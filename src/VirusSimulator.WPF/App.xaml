@@ -1,0 +1,10 @@
+﻿<Application x:Class="VirusSimulator.WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:VirusSimulator.WPF"
+             xmlns:VMLocator="clr-namespace:VirusSimulator.WPF.ViewModel"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <VMLocator:VMLocator x:Key="VMLocator"/>
+    </Application.Resources>
+</Application>
