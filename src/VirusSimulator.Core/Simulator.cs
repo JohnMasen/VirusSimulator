@@ -7,15 +7,17 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace VirusSimulator.Core
 {
-    public class Simulator<TArea, TPerson> where TArea : IArea,new() where TPerson:IPerson,new()
+    public class Simulator<TArea, TPerson>:IRuntimeObject where TArea : IArea,new() where TPerson:IPerson,new() 
     {
+        public Runtime Runtime { get; set; }
         public event EventHandler<TPerson> OnPersonCreated;
         CancellationTokenSource cts = new CancellationTokenSource();
-        public TArea Area { get; private set; } = new TArea();
-        private Dictionary<int,TPerson> persons = new Dictionary<int, TPerson>();
-        public IEnumerable<KeyValuePair<int,TPerson>> Persons => persons;
+        //public TArea Area { get; private set; } = new TArea();
+        //private Dictionary<int,TPerson> persons = new Dictionary<int, TPerson>();
+        //public IEnumerable<KeyValuePair<int,TPerson>> Persons => persons;
 
-        public DateTime WorldClock { get; private set; }
+        //public DateTime WorldClock { get; private set; }
+
 
 
         public void Init(float width, float height, int count)
@@ -24,34 +26,47 @@ namespace VirusSimulator.Core
         }
         public void Init(float width,float height, int count,DateTime clock)
         {
-            WorldClock = clock;
-            Area.Init(width, height,count);
-            foreach (var item in Area.Points)
+            Runtime = new Runtime(new TArea(), clock);
+            Runtime.Area.Init(width, height, count);
+            foreach (var item in Runtime.Area.Points)
             {
-                TPerson p = new TPerson();
-                p.Init(item.Key, WorldClock, item.Value);
+                TPerson p = new TPerson() { Runtime = Runtime };
+                p.Init(item.Key,  item.Value);
                 OnPersonCreated?.Invoke(this,p);
-                persons.Add(p.ID,p);
+                Runtime.Persons.Add(p.ID,p);
             }
             
         }
 
         public void Step(TimeSpan duration)
         {
-            foreach (var item in persons)
+            //update position
+            //Runtime.Persons.AsParallel().ForAll(item =>
+            //{
+            //    item.Value.Update(duration);
+            //    Runtime.Area.Points[item.Key] = item.Value.Position;
+            //});
+            Person p = new Person();
+
+            foreach (var item in Runtime.Persons)
             {
                 item.Value.Update(duration);
-                Area.Points[item.Key] = item.Value.Position;
+                Runtime.Area.Points[item.Key] = item.Value.Position;
+
+            }
+            //update virus status
+            foreach (var item in Runtime.Persons)
+            {
                 foreach (var virus in item.Value.Viruses)
                 {
-                    foreach (var candidate in virus.Value.ScanForCandidates(item.Value, Area))//扫描潜在感染者
+                    foreach (var candidate in virus.Value.ScanForCandidates(item.Value, Runtime.Area))//扫描潜在感染者
                     {
-                        virus.Value.Infect(item.Value, persons[candidate]);//逐个感染
-                    } 
+                        virus.Value.Infect(item.Value, Runtime.Persons[candidate]);//逐个感染
+                    }
                 }
             }
-            
-            WorldClock += duration;
+
+            Runtime.WorldClock += duration;
         }
     }
 }

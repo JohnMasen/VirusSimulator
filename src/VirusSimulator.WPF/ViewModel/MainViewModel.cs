@@ -15,6 +15,9 @@ using VirusSimulator.Core;
 using VirusSimulator.Person;
 using System.Linq;
 using VirusSimulator.Virus;
+using System.Runtime.CompilerServices;
+using VirusSimulator.Core.Test;
+using System.Windows.Documents;
 
 namespace VirusSimulator.WPF.ViewModel
 {
@@ -25,9 +28,13 @@ namespace VirusSimulator.WPF.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
+
+        private int frameCount = 0;
+        private const int FRAME_SKIP = 0;
+        Runner<TestContext> runner;
         public MainViewModel()
         {
-            simulator.Init(1000, 1000, 1000);
+            simulator.Init(1000, 1000, 3000);
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points,MarkerSize=2 });
             PlotModel.Axes.Clear();
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = 1000 });
@@ -37,14 +44,17 @@ namespace VirusSimulator.WPF.ViewModel
             colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0, 255, 0));
             colorAxe.Palette.Colors.Add(OxyColor.FromRgb(255, 0, 0));
             
-            PlotModel.Axes.Add(colorAxe);
+            //PlotModel.Axes.Add(colorAxe);
             InitInfection();
+            runner = new Runner<TestContext>(5000, 10, new System.Drawing.SizeF(1000, 1000));
+            runner.Processors.Add(new PersonMoveProcessor());
+
         }
 
         private void InitInfection()
         {
             SimpleVirus virus = new SimpleVirus();
-            foreach (var item in simulator.Persons.Take(10))
+            foreach (var item in simulator.Runtime.Persons.Take(10))
             {
                 virus.Infect(null, item.Value);
             }
@@ -74,26 +84,66 @@ namespace VirusSimulator.WPF.ViewModel
         }
         private void doStep()
         {
-            simulator.Step(TimeSpan.FromDays(1));
+            //simulator.Step(TimeSpan.FromDays(1));
+            runner.Step();
+            renderResult();
+        }
+
+        private void renderResult()
+        {
             points.Clear();
-            foreach (var item in simulator.Persons)
+
+            //foreach (var item in simulator.Runtime.Persons)
+            //{
+            //    points.Add(new ScatterPoint(item.Value.Position.X, item.Value.Position.Y, 3, item.Value.Viruses.Count == 0 ? 0 : 1));
+            //}
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
+            //    PlotModel.InvalidatePlot(false);
+            //});
+            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Infected)));
+            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WorldClock)));
+
+            foreach (var item in runner.Context.Persons.Items.Span)
             {
-                points.Add(new ScatterPoint(item.Value.Position.X, item.Value.Position.Y, 3, item.Value.Viruses.Count == 0 ? 0 : 1));
+                points.Add(new ScatterPoint(item.Position.X, item.Position.Y, 3));
             }
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 PlotModel.InvalidatePlot(false);
             });
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Infected)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WorldClock)));
         }
 
         private async void DoLoop(CancellationToken token)
         {
+            //while (!token.IsCancellationRequested)
+            //{
+            //    simulator.Step(TimeSpan.FromDays(1));
+            //    if (frameCount==0)
+            //    {
+            //        renderResult();
+            //    }
+            //    frameCount++;
+            //    if (frameCount>FRAME_SKIP)
+            //    {
+            //        frameCount = 0;
+            //    }
+            //    await Task.Delay(30);
+            //}
             while (!token.IsCancellationRequested)
             {
-                doStep();
-                await Task.Delay(30);
+                runner.Step();
+                if (frameCount == 0)
+                {
+                    renderResult();
+                }
+                frameCount++;
+                if (frameCount > FRAME_SKIP)
+                {
+                    frameCount = 0;
+                }
+                await Task.Delay(13);
             }
         }
 
@@ -105,7 +155,7 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
-                return simulator.Persons.Count(x => x.Value.Viruses.Count > 0);
+                return simulator.Runtime.Persons.Count(x => x.Value.Viruses.Count > 0);
             }
         }
 
@@ -113,9 +163,11 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
-                return simulator.WorldClock;
+                return runner.Context.WorldClock;
             }
         }
+
+        
 
     }
 }

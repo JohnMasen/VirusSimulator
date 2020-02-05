@@ -8,14 +8,14 @@ namespace VirusSimulator.Core
     {
         static Random random = new Random();
         public static readonly float TwoPI = (float)Math.PI * 2;
-        public static float NextRandom(float min, float max)
+        public static float NextFloat(this Random r, float min, float max)
         {
-            return min + (float)random.NextDouble() * (max - min);
+            return min + (float)r.NextDouble() * (max - min);
         }
 
-        public static float NextRandom(float max)
+        public static float NextFloat(this Random r,float max)
         {
-            return NextRandom(0, max);
+            return r.NextFloat(0, max);
         }
 
 

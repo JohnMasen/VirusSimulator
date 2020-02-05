@@ -5,11 +5,10 @@ using System.Numerics;
 
 namespace VirusSimulator.Core
 {
-    public interface IPerson
+    public interface IPerson:IRuntimeObject
     {
-        public DateTime Now { get;  }
         public int ID { get;  }
-        public void Init(int id, DateTime now, Vector2 position);
+        public void Init(int id,  Vector2 position);
         
         public void Update(TimeSpan duration);
 

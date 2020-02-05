@@ -7,7 +7,7 @@ using System.Text;
 
 namespace VirusSimulator.Core
 {
-    public interface IArea
+    public interface IArea:IRuntimeObject
     {
         void Init(float width, float height,int pointsCount);
 
