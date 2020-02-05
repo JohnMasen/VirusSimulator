@@ -30,7 +30,7 @@ namespace VirusSimulator.WPF.ViewModel
         List<ScatterPoint> points = new List<ScatterPoint>();
 
         private int frameCount = 0;
-        private const int FRAME_SKIP = 0;
+        private const int FRAME_SKIP = 1000;
         Runner<TestContext> runner;
         public MainViewModel()
         {
@@ -137,13 +137,14 @@ namespace VirusSimulator.WPF.ViewModel
                 if (frameCount == 0)
                 {
                     renderResult();
+                    await Task.Delay(33);
                 }
                 frameCount++;
                 if (frameCount > FRAME_SKIP)
                 {
                     frameCount = 0;
                 }
-                await Task.Delay(13);
+                
             }
         }
 

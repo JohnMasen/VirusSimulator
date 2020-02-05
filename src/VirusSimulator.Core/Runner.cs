@@ -10,7 +10,6 @@ namespace VirusSimulator.Core
     {
         public List<IProcessor<T>> Processors { get; private set; } = new List<IProcessor<T>>();
         public T Context { get; private set; }
-        Random r = new Random();
         public Runner(int personCount,int bins,SizeF areaSize)
         {
             Context = new T();
@@ -21,7 +20,7 @@ namespace VirusSimulator.Core
 
         private void randomizeItemPosition(ref Person person)
         {
-            person.MoveTo(r.NextFloat(Context.Size.Width), r.NextFloat(Context.Size.Height));
+            person.MoveTo(Helper.RandomFloat(Context.Size.Width), Helper.RandomFloat(Context.Size.Height));
         }
 
         public void Step()

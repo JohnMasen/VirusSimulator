@@ -14,15 +14,14 @@ namespace VirusSimulator.Core.Test
             this.context = context;
             context.Persons.ForAllBlocks(block =>
             {
-                Random r = new Random();
                 var s = block.Span;
                 for (int i = 0; i < s.Length; i++)
                 {
                     ref Person person = ref s[i];
                     (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
-                    float rr=r.NextFloat(Helper.TwoPI);
-                    person.Rotate(rr);
-                    float d = r.NextFloat(-Speed);
+                    float r = Helper.RandomFloat(Helper.TwoPI);
+                    person.Rotate(r);
+                    float d = Helper.RandomFloat(-Speed);
                     person.MoveTo(0, d);
                     if (person.Position.X < 0 || person.Position.X > context.Size.Width || person.Position.Y < 0 || person.Position.Y > context.Size.Height)
                     {
