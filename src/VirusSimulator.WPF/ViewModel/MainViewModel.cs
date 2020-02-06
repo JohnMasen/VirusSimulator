@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using VirusSimulator.Core.Test;
 using System.Windows.Documents;
 using System.Diagnostics;
+using VirusSimulator.Core.Processors;
 
 namespace VirusSimulator.WPF.ViewModel
 {
@@ -28,11 +29,8 @@ namespace VirusSimulator.WPF.ViewModel
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
 
-        //private int frameCount = 0;
-        //private const int FRAME_SKIP = 100;
         Runner<TestContext> runner;
 
-        private RenderHelper renderHelper;
         public MainViewModel()
         {
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
@@ -49,8 +47,7 @@ namespace VirusSimulator.WPF.ViewModel
             runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
             runner.Processors.Add(new PersonMoveProcessor());
             runner.Processors.Add(new TestVirusProcessor(3) { InfectionRadius = 2f });
-
-            renderHelper = new RenderHelper(renderResult) { FrameSkip = 5 } ;
+            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10 });
         }
 
 
@@ -80,22 +77,18 @@ namespace VirusSimulator.WPF.ViewModel
         private void doStep()
         {
             runner.Step(TimeSpan.FromHours(1));
-            renderHelper.TryRender(true);
+            renderResult(runner.Context,0);
         }
 
-        private void renderResult()
+        private void renderResult(TestContext c,long frameCount)
         {
             points.Clear();
 
-            var vData = runner.Context.VirusData.Items.Span;
-            foreach (var item in runner.Context.Persons.Items.Span)
+            var vData = c.VirusData.Items.Span;
+            foreach (var item in c.Persons.Items.Span)
             {
                 points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.ID].IsInfected ? 1 : 0));
             }
-            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            //{
-            
-            //});
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 PlotModel.InvalidatePlot(false);
@@ -110,13 +103,9 @@ namespace VirusSimulator.WPF.ViewModel
             while (!token.IsCancellationRequested)
             {
                 runner.Step(TimeSpan.FromHours(1));
-
-                renderHelper.TryRender();
-
             }
         }
 
-        //public List<ScatterPoint> SeriesData { get; } = new List<ScatterPoint>();
 
         public PlotModel PlotModel { get; } = new PlotModel();
 
@@ -141,44 +130,6 @@ namespace VirusSimulator.WPF.ViewModel
             get
             {
                 return runner.Context.WorldClock;
-            }
-        }
-
-        private class RenderHelper
-        {
-            private Stopwatch sw = new Stopwatch();
-            public TimeSpan FrameGap { get; set; } = TimeSpan.FromMilliseconds(100);
-            public int FrameSkip { get; set; } = int.MaxValue;
-            private int skipCount = 0;
-            private int frameCount;
-            private Action render;
-            public RenderHelper(Action renderCallback)
-            {
-                render = renderCallback;
-                sw.Start();
-            }
-            public bool TryRender(bool forceRender = false)
-            {
-                frameCount++;
-
-                if (skipCount > FrameSkip)
-                {
-                    skipCount = 0;
-                }
-                if (sw.Elapsed > FrameGap || skipCount == 0 || forceRender)
-                {
-
-                    skipCount = 1;
-                    Debug.WriteLine($"Render frame {frameCount} at Thread {Thread.CurrentThread.ManagedThreadId}");
-                    render();
-                    sw.Restart();
-                    return true;
-                }
-                else
-                {
-                    skipCount++;
-                    return false;
-                }
             }
         }
 
