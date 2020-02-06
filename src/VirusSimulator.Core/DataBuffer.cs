@@ -12,17 +12,17 @@ namespace VirusSimulator.Core
         private Memory<T> buffer;
         public ReadOnlyMemory<T> Items { get; private set; }
         public delegate void ForAllDelegate(ref T item);
-        
-        List<Memory<T>> blocks = new List<Memory<T>>();
+
+        readonly List<Memory<T>> blocks = new List<Memory<T>>();
 
         public int Bins => blocks.Count;
 
-        public DataBuffer(int size, int bins,Func<T> creationCallback)
+        public DataBuffer(int size, int bins,Func<int,T> creationCallback)
         {
             T[] data = new T[size];
             for (int i = 0; i < data.Length; i++)
             {
-                data[i] = creationCallback();
+                data[i] = creationCallback(i);
             }
             initFromArray(data, bins);
         }
@@ -33,7 +33,7 @@ namespace VirusSimulator.Core
 
         public DataBuffer(T[] data,  int bins)
         {
-            initFromArray(data, bins);
+            initFromArray(data?? throw new ArgumentNullException(nameof(data)), bins);
         }
 
         private void initFromArray(T[] data, int bins)
@@ -81,7 +81,7 @@ namespace VirusSimulator.Core
 
         public void ForAll(Action<Memory<T>> action)
         {
-            action(buffer);
+            (action ?? throw new ArgumentNullException(nameof(action))).Invoke(buffer);
         }
 
         public void ForAll(ForAllDelegate action)

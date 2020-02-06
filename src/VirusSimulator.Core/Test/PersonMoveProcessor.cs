@@ -5,36 +5,39 @@ using System.Text;
 
 namespace VirusSimulator.Core.Test
 {
-    public class PersonMoveProcessor : IProcessor<TestContext>
+
+    public class PersonMoveProcessor<T> : IProcessor<T> where T:RunContext
     {
         public float Speed { get; set; } = 10f;
-        private TestContext context;
-        public void Process(TestContext context,TimeSpan span)
+        //private TestContext context;
+        
+        public void Process(T context,TimeSpan span)
         {
-            this.context = context;
-            context.Persons.ForAllBlocks(block =>
+            (context??throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((ref PositionItem person)=>
             {
-                var s = block.Span;
-                for (int i = 0; i < s.Length; i++)
+                (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
+                float r = Helper.RandomFloat(Helper.TwoPI);
+                person.Rotate(r);
+                float d = Helper.RandomFloat(Speed);
+                person.MoveTo(0, d);
+                if (person.Position.X < 0 || person.Position.X > context.Size.Width || person.Position.Y < 0 || person.Position.Y > context.Size.Height)
                 {
-                    ref Person person = ref s[i];
-                    (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
-                    float r = Helper.RandomFloat(Helper.TwoPI);
-                    person.Rotate(r);
-                    float d = Helper.RandomFloat(Speed);
-                    person.MoveTo(0, d);
-                    if (person.Position.X < 0 || person.Position.X > context.Size.Width || person.Position.Y < 0 || person.Position.Y > context.Size.Height)
-                    {
-                        //restore previous position
-                        person.Position = previous.position;
-                        person.Transform = previous.transform;
-                    }
+                    //out of area, restore previous position
+                    person.Position = previous.position;
+                    person.Transform = previous.transform;
                 }
-            });
+            }
+            );
         }
 
-        public void Init(TestContext context)
+
+        public void Init(T context)
         {
+            (context ?? throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((ref PositionItem p)=> 
+            {
+                p.MoveTo(Helper.RandomFloat(context.Size.Width), Helper.RandomFloat(context.Size.Height));
+            });
         }
+        
     }
 }

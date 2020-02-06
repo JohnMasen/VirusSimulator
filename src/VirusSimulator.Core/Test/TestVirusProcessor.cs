@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
+
 namespace VirusSimulator.Core.Test
 {
     public struct InfectionData
@@ -13,20 +15,19 @@ namespace VirusSimulator.Core.Test
         public bool IsInfected;
         public bool IsInfectedNext;
     }
-    public class TestVirusProcessor : IProcessor<TestContext>
+    public class TestVirusProcessor<T> : IProcessor<T> where T: notnull,RunContext, IVirusContext
     {
         public float InfectionRadius { get; set; } = 5f;
-        QuadTree.QuadTreeNode index;
-        TestContext c;
+        QuadTree.QuadTreeNode<PositionItem> index;
         int infected;
         public TestVirusProcessor(int infectedCount)
         {
             infected = infectedCount;
         }
-        public void Process(TestContext context, TimeSpan span)
+        public void Process(T context, TimeSpan span)
         {
-            c = context;
-            index = new QuadTree.QuadTreeNode(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
+            _ = context ?? throw new ArgumentNullException(nameof(context));
+            index = PositionItem.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
             for (int i = 0; i < context.VirusData.Items.Span.Length; i++)
             {
                 var item = context.VirusData.Items.Span[i];
@@ -35,35 +36,31 @@ namespace VirusSimulator.Core.Test
                     index.AddItem(context.Persons.Items.Span[i]);
                 }
             }
-            context.VirusData.ForAll(tryInfection);
+            //try to infection
+            context.VirusData.ForAll((ref InfectionData data)=>
+            {
+                if (!data.IsInfected)
+                {
+                    var result = index.GetItemInDistance(context.Persons.Items.Span[data.ID].Position, InfectionRadius)?.Any();
+                    data.IsInfectedNext = (result == true);
+                }
+            });
+            //commit infection
             context.VirusData.ForAllParallel(updateInfection);
         }
-
-        public void Init(TestContext context)
+        public void Init(T context)
         {
-            context.VirusData.ForAllBlocks(block =>
+            context.VirusData = new DataBuffer<InfectionData>(context.Persons.Items.Length, context.Persons.Bins,index=>
             {
-                for (int i = 0; i < block.Span.Length; i++)
-                {
-                    if (block.Span[i].ID<infected)
-                    {
-                        block.Span[i].IsInfected = true;
-                    }
-                }
+                return new InfectionData() { ID = index, IsInfected = index < infected };
             });
         }
 
-        private void tryInfection(ref InfectionData data)
-        {
-            if (!data.IsInfected)
-            {
-                data.IsInfectedNext=index.GetPersonInDistance(c.Persons.Items.Span[data.ID].Position, InfectionRadius).Any();
-            }
-        }
+        
 
         private void updateInfection(ref InfectionData data)
         {
-            if (data.IsInfectedNext==true)
+            if (data.IsInfectedNext == true)
             {
                 data.IsInfected = true;
             }
