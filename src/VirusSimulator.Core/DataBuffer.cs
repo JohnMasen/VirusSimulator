@@ -33,7 +33,7 @@ namespace VirusSimulator.Core
 
         public DataBuffer(T[] data,  int bins)
         {
-            initFromArray(data, bins);
+            initFromArray(data?? throw new ArgumentNullException(nameof(data)), bins);
         }
 
         private void initFromArray(T[] data, int bins)
@@ -81,7 +81,7 @@ namespace VirusSimulator.Core
 
         public void ForAll(Action<Memory<T>> action)
         {
-            action(buffer);
+            (action ?? throw new ArgumentNullException(nameof(action))).Invoke(buffer);
         }
 
         public void ForAll(ForAllDelegate action)

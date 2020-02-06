@@ -13,8 +13,7 @@ namespace VirusSimulator.Core.Test
         
         public void Process(T context,TimeSpan span)
         {
-            //this.context = context;
-            context.Persons.ForAllParallel((ref Person person)=>
+            (context??throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((ref PositionItem person)=>
             {
                 (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
                 float r = Helper.RandomFloat(Helper.TwoPI);
@@ -34,7 +33,7 @@ namespace VirusSimulator.Core.Test
 
         public void Init(T context)
         {
-            context.Persons.ForAllParallel((ref Person p)=> 
+            (context ?? throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((ref PositionItem p)=> 
             {
                 p.MoveTo(Helper.RandomFloat(context.Size.Width), Helper.RandomFloat(context.Size.Height));
             });

@@ -10,7 +10,7 @@ namespace VirusSimulator.Core
     public abstract class RunContext
     {
         
-        public DataBuffer<Person> Persons { get; internal set; }
+        public DataBuffer<PositionItem> Persons { get; internal set; }
         public DateTime WorldClock { get; set; } 
         public SizeF Size { get;  set; }
 
@@ -23,7 +23,7 @@ namespace VirusSimulator.Core
         public static T CreateInstance<T>(int personCount, DateTime clock, SizeF size, int bins = 10) where T:RunContext,new()
         {
             T result = new T();
-            result.Persons = new DataBuffer<Person>(personCount, bins,index=>new Person() { Transform = Matrix3x2.Identity ,ID=index});
+            result.Persons = new DataBuffer<PositionItem>(personCount, bins,index=>new PositionItem() { Transform = Matrix3x2.Identity ,ID=index});
             result.WorldClock = clock;
             result.Size = size;
             result.Init();
