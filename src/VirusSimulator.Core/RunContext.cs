@@ -27,7 +27,6 @@ namespace VirusSimulator.Core
             result.Persons = new DataBuffer<Person>(personCount, bins,()=>new Person() { Transform = Matrix3x2.Identity ,ID=id++});
             result.WorldClock = clock;
             result.Size = size;
-
             result.Init();
             return result;
         }

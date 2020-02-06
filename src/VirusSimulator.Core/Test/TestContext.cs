@@ -13,7 +13,7 @@ namespace VirusSimulator.Core.Test
         
         protected override void Init()
         {
-            Persons.ForAll(randomizeItemPosition);
+            
             VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
             VirusData.ForAll(buffer =>
             {
@@ -23,10 +23,6 @@ namespace VirusSimulator.Core.Test
                 }
             });
         }
-        private void randomizeItemPosition(ref Person person)
-        {
-            //person.Position = Vector2.One;
-            person.MoveTo(Helper.RandomFloat(Size.Width), Helper.RandomFloat(Size.Height));
-        }
+        
     }
 }

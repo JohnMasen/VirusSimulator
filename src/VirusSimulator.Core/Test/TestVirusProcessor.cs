@@ -45,7 +45,7 @@ namespace VirusSimulator.Core.Test
             {
                 for (int i = 0; i < block.Span.Length; i++)
                 {
-                    if (block.Span[i].ID<infected)
+                    if (block.Span[i].ID < infected)
                     {
                         block.Span[i].IsInfected = true;
                     }
@@ -57,13 +57,14 @@ namespace VirusSimulator.Core.Test
         {
             if (!data.IsInfected)
             {
-                data.IsInfectedNext=index.GetPersonInDistance(c.Persons.Items.Span[data.ID].Position, InfectionRadius).Any();
+                var result = index.GetPersonInDistance(c.Persons.Items.Span[data.ID].Position, InfectionRadius)?.Any();
+                data.IsInfectedNext = (result == true);
             }
         }
 
         private void updateInfection(ref InfectionData data)
         {
-            if (data.IsInfectedNext==true)
+            if (data.IsInfectedNext == true)
             {
                 data.IsInfected = true;
             }

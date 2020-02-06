@@ -35,7 +35,7 @@ namespace VirusSimulator.WPF.ViewModel
         private RenderHelper renderHelper;
         public MainViewModel()
         {
-            PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 2 });
+            PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
             PlotModel.Axes.Clear();
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = 1000 });
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = 1000, Position = AxisPosition.Bottom });
@@ -90,7 +90,7 @@ namespace VirusSimulator.WPF.ViewModel
             var vData = runner.Context.VirusData.Items.Span;
             foreach (var item in runner.Context.Persons.Items.Span)
             {
-                points.Add(new ScatterPoint(item.Position.X, item.Position.Y, 3, vData[item.ID].IsInfected ? 1 : 0));
+                points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.ID].IsInfected ? 1 : 0));
             }
             //System.Windows.Application.Current.Dispatcher.Invoke(() =>
             //{
