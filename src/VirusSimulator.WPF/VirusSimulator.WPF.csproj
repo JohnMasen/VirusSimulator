@@ -12,10 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VirusSimulator.Area\VirusSimulator.Area.csproj" />
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
-    <ProjectReference Include="..\VirusSimulator.Person\VirusSimulator.Person.csproj" />
-    <ProjectReference Include="..\VirusSimulator.Virus\VirusSimulator.Virus.csproj" />
   </ItemGroup>
 
 </Project>

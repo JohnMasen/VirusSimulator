@@ -9,7 +9,7 @@ namespace VirusSimulator.Core.Test
     {
         public float Speed { get; set; } = 10f;
         private TestContext context;
-        public void Process(TestContext context)
+        public void Process(TestContext context,TimeSpan span)
         {
             this.context = context;
             context.Persons.ForAllBlocks(block =>
@@ -21,7 +21,7 @@ namespace VirusSimulator.Core.Test
                     (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
                     float r = Helper.RandomFloat(Helper.TwoPI);
                     person.Rotate(r);
-                    float d = Helper.RandomFloat(-Speed);
+                    float d = Helper.RandomFloat(Speed);
                     person.MoveTo(0, d);
                     if (person.Position.X < 0 || person.Position.X > context.Size.Width || person.Position.Y < 0 || person.Position.Y > context.Size.Height)
                     {
@@ -33,19 +33,8 @@ namespace VirusSimulator.Core.Test
             });
         }
 
-        //private void doMove(ref Person person)
-        //{
-        //    (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
-        //    float r = Helper.NextRandom(Helper.TwoPI);
-        //    person.Rotate(r);
-        //    float d = Helper.NextRandom(-Speed);
-        //    person.MoveTo(0, d);
-        //    if (person.Position.X<0 || person.Position.X>context.Size.Width || person.Position.Y<0 || person.Position.Y>context.Size.Height)
-        //    {
-        //        //restore previous position
-        //        person.Position = previous.position;
-        //        person.Transform = previous.transform;
-        //    }
-        //}
+        public void Init(TestContext context)
+        {
+        }
     }
 }

@@ -17,6 +17,15 @@ namespace VirusSimulator.Core
 
         public int Bins => blocks.Count;
 
+        public DataBuffer(int size, int bins,Func<T> creationCallback)
+        {
+            T[] data = new T[size];
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] = creationCallback();
+            }
+            initFromArray(data, bins);
+        }
         public DataBuffer(int size, int bins) : this(new T[size], bins)
         { 
 
@@ -24,11 +33,16 @@ namespace VirusSimulator.Core
 
         public DataBuffer(T[] data,  int bins)
         {
+            initFromArray(data, bins);
+        }
+
+        private void initFromArray(T[] data, int bins)
+        {
             buffer = data.AsMemory();
             Items = buffer;
             int size = data.Length;
             int binSize = size / bins;
-            if (size % bins>0)
+            if (size % bins > 0)
             {
                 binSize++;
             }
@@ -63,6 +77,7 @@ namespace VirusSimulator.Core
                 }
             });
         }
+
 
         public void ForAll(Action<Memory<T>> action)
         {
