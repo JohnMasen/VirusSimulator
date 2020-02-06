@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using System.Text;
+using VirusSimulator.Core.QuadTree;
 
 namespace VirusSimulator.Core
 {
@@ -10,6 +12,15 @@ namespace VirusSimulator.Core
         public int ID;
         public Vector2 Position;
         public Matrix3x2 Transform;
+        public static implicit operator Vector2(Person p)
+        {
+            return p.Position;
+        }
+
+        public static QuadTreeNode<Person> CreatePersonQuadTree(RectangleF range,int capacity=10)
+        {
+            return new QuadTreeNode<Person>(range, (ref Person p) =>p.Position, capacity);
+        }
     }
 
     public static class PersonHelper
@@ -47,5 +58,7 @@ namespace VirusSimulator.Core
             );
             return result;
         }
+
+        
     }
 }

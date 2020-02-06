@@ -8,14 +8,27 @@ using System.Text;
 
 namespace VirusSimulator.Core.QuadTree
 {
-    public class QuadTreeNode
+    public class QuadTreeNode<T>
     {
+        private struct PostionItem<TItem>
+        {
+            public Vector2 Position;
+            public T Item;
+        }
+
         public readonly RectangleF Range;
-        public Lazy<List<Person>> Items=new Lazy<List<Person>>();
+        public Lazy<List<T>> Items=new Lazy<List<T>>();
         private int capacity;
         private Vector2 center;
-        public List<QuadTreeNode> Children;
-        public QuadTreeNode(RectangleF range,int Capacity=10)
+        public List<QuadTreeNode<T>> Children;
+
+        public delegate Vector2 GetPositionDelegate(ref T value);
+
+        private GetPositionDelegate getPosition;
+
+
+        
+        public QuadTreeNode(RectangleF range, GetPositionDelegate getPositionCallback, int Capacity=10)
         {
             if (Capacity<=0)
             {
@@ -24,16 +37,17 @@ namespace VirusSimulator.Core.QuadTree
             Range = range;
             capacity = Capacity;
             center = new Vector2(Range.X + Range.Width / 2, Range.Top + Range.Height / 2);
+            getPosition = getPositionCallback;
         }
-        public void AddItem(Person person)
+        public void AddItem(T newItem)
         {
             if (Children!=null)//try insert into children
             {
                 foreach (var item in Children)
                 {
-                    if (item.IsInRange(person.Position))
+                    if (item.IsInRange(getPosition(ref newItem)))
                     {
-                        item.AddItem(person);
+                        item.AddItem(newItem);
                         return;
                     }
                 }
@@ -51,12 +65,12 @@ namespace VirusSimulator.Core.QuadTree
                     }
                     Items.Value.Clear();
                     //don't forget add current item
-                    AddItem(person);
+                    AddItem(newItem);
                 }
                 else
                 {
                     //always add current item
-                    Items.Value.Add(person);
+                    Items.Value.Add(newItem);
                 }
                 
             }
@@ -65,12 +79,12 @@ namespace VirusSimulator.Core.QuadTree
         public bool IsLeaf => Children == null;
         private void splitRange()
         {
-            Children = new List<QuadTreeNode>(4);
+            Children = new List<QuadTreeNode<T>>(4);
             
-            Children.Add(new QuadTreeNode(RectangleF.FromLTRB(Range.Left, Range.Top, center.X, center.Y), capacity));//top left
-            Children.Add(new QuadTreeNode(RectangleF.FromLTRB(center.X, Range.Top, Range.Right, center.Y), capacity));//top right
-            Children.Add(new QuadTreeNode(RectangleF.FromLTRB(Range.Left, center.Y, center.X, Range.Bottom), capacity));//bottom left
-            Children.Add(new QuadTreeNode(RectangleF.FromLTRB(center.X, center.Y, Range.Right, Range.Bottom), capacity));//bottom right
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, Range.Top, center.X, center.Y),getPosition, capacity));//top left
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, Range.Top, Range.Right, center.Y), getPosition, capacity));//top right
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, center.Y, center.X, Range.Bottom), getPosition, capacity));//bottom left
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, center.Y, Range.Right, Range.Bottom), getPosition, capacity));//bottom right
         }
         public bool IsInRange(Vector2 v)
         {
@@ -79,45 +93,57 @@ namespace VirusSimulator.Core.QuadTree
 
         public bool IsIntersectWithCircle(Vector2 circleCenter,float radius)
         {
-            if (Range.Contains(circleCenter.X,circleCenter.Y)) //check if the center inside the range
+            return IsIntersectWithCircleInternal(circleCenter, radius * radius);
+        }
+
+        private bool IsIntersectWithCircleInternal(Vector2 circleCenter,float radiusSqr)
+        {
+            if (Range.Contains(circleCenter.X, circleCenter.Y)) //check if the center inside the range
             {
                 return true;
             }
             //algorithum reference: https://blog.csdn.net/noahzuo/article/details/52037151
             Vector2 a = Vector2.Abs(circleCenter - center);
-            Vector2 e = Vector2.Max(a - (new Vector2(Range.Right, Range.Top)-center), Vector2.Zero);
-            return Vector2.Dot(e,e) <= radius * radius;//use dot instead of lengthsquart to prevent boxing
+            Vector2 e = Vector2.Max(a - (new Vector2(Range.Right, Range.Top) - center), Vector2.Zero);
+            return Vector2.Dot(e, e) <= radiusSqr;//use dot instead of lengthsquart to prevent boxing
         }
 
-        public IEnumerable<Person> GetPersonInDistance(Vector2 position, float distance)
+        public IEnumerable<T> GetItemInDistance(Vector2 position,float distance)
         {
-            float d2 = distance * distance;
+            return GetItemInDistanceInternal(position,distance * distance);
+        }
+
+        private IEnumerable<T> GetItemInDistanceInternal(Vector2 position, float distanceSqr)
+        {
+            
             if (IsLeaf)
             {
-                return Items.Value.Where(x=>Vector2.DistanceSquared(position,x.Position)<=d2);
+                return Items.Value.Where(x=>Vector2.DistanceSquared(position, getPosition(ref x))<= distanceSqr);
             }
             else
             {
-                IEnumerable<Person> result = null;
+                IEnumerable<T> result = null;
                 foreach (var item in Children)
                 {
                     
-                    if (item.IsIntersectWithCircle(position,distance))
+                    if (item.IsIntersectWithCircleInternal(position,distanceSqr))
                     {
                         if (result==null)
                         {
-                            result = item.GetPersonInDistance(position, distance);
+                            result = item.GetItemInDistanceInternal(position, distanceSqr);
                         }
                         else
                         {
-                            result = result.Concat(item.GetPersonInDistance(position,distance));
+                            result = result.Concat(item.GetItemInDistanceInternal(position, distanceSqr));
                         }
                         
                     }
                 }
-                return result?.Where(x => Vector2.DistanceSquared(position, x.Position) <= d2);
+                return result?.Where(x => Vector2.DistanceSquared(position, getPosition(ref x)) <= distanceSqr);
             }
         }
+
+
         
     }
 }

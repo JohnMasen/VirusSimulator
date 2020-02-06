@@ -16,7 +16,7 @@ namespace VirusSimulator.Core.Test
     public class TestVirusProcessor : IProcessor<TestContext>
     {
         public float InfectionRadius { get; set; } = 5f;
-        QuadTree.QuadTreeNode index;
+        QuadTree.QuadTreeNode<Person> index;
         TestContext c;
         int infected;
         public TestVirusProcessor(int infectedCount)
@@ -26,7 +26,7 @@ namespace VirusSimulator.Core.Test
         public void Process(TestContext context, TimeSpan span)
         {
             c = context;
-            index = new QuadTree.QuadTreeNode(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
+            index = Person.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
             for (int i = 0; i < context.VirusData.Items.Span.Length; i++)
             {
                 var item = context.VirusData.Items.Span[i];
@@ -57,7 +57,7 @@ namespace VirusSimulator.Core.Test
         {
             if (!data.IsInfected)
             {
-                var result = index.GetPersonInDistance(c.Persons.Items.Span[data.ID].Position, InfectionRadius)?.Any();
+                var result = index.GetItemInDistance(c.Persons.Items.Span[data.ID].Position, InfectionRadius)?.Any();
                 data.IsInfectedNext = (result == true);
             }
         }
