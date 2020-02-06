@@ -5,12 +5,13 @@ using System.Text;
 
 namespace VirusSimulator.Core.Test
 {
-    public class PersonMoveProcessor : IProcessor<TestContext>
+
+    public class PersonMoveProcessor<T> : IProcessor<T> where T:RunContext
     {
         public float Speed { get; set; } = 10f;
         //private TestContext context;
         
-        public void Process(TestContext context,TimeSpan span)
+        public void Process(T context,TimeSpan span)
         {
             //this.context = context;
             context.Persons.ForAllParallel((ref Person person)=>
@@ -31,7 +32,7 @@ namespace VirusSimulator.Core.Test
         }
 
 
-        public void Init(TestContext context)
+        public void Init(T context)
         {
             context.Persons.ForAllParallel((ref Person p)=> 
             {

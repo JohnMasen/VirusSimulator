@@ -45,8 +45,8 @@ namespace VirusSimulator.WPF.ViewModel
             PlotModel.Axes.Add(colorAxe);
 
             runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
-            runner.Processors.Add(new PersonMoveProcessor());
-            runner.Processors.Add(new TestVirusProcessor(3) { InfectionRadius = 2f });
+            runner.Processors.Add(new PersonMoveProcessor<TestContext>());
+            runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
             runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10 });
         }
 
@@ -84,7 +84,7 @@ namespace VirusSimulator.WPF.ViewModel
         {
             points.Clear();
 
-            var vData = c.VirusData.Items.Span;
+            var vData = (c as IVirusContext).VirusData.Items.Span;
             foreach (var item in c.Persons.Items.Span)
             {
                 points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.ID].IsInfected ? 1 : 0));
@@ -113,15 +113,7 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
-                int result = 0;
-                foreach (var item in runner.Context.VirusData.Items.Span)
-                {
-                    if (item.IsInfected)
-                    {
-                        result++;
-                    }
-                }
-                return result;
+                return (runner.Context as IVirusContext).GetInfectedCount();
             }
         }
 

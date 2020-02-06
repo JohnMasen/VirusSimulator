@@ -13,17 +13,17 @@ namespace VirusSimulator.Core.Test
         public bool IsInfected;
         public bool IsInfectedNext;
     }
-    public class TestVirusProcessor : IProcessor<TestContext>
+    public class TestVirusProcessor<T> : IProcessor<T> where T:RunContext,IVirusContext
     {
         public float InfectionRadius { get; set; } = 5f;
         QuadTree.QuadTreeNode<Person> index;
-        TestContext c;
+        T c;
         int infected;
         public TestVirusProcessor(int infectedCount)
         {
             infected = infectedCount;
         }
-        public void Process(TestContext context, TimeSpan span)
+        public void Process(T context, TimeSpan span)
         {
             c = context;
             index = Person.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
@@ -39,15 +39,27 @@ namespace VirusSimulator.Core.Test
             context.VirusData.ForAllParallel(updateInfection);
         }
 
-        public void Init(TestContext context)
+        public void Init(T context)
         {
-            context.VirusData.ForAllParallel((ref InfectionData d) =>
+            context.VirusData = new DataBuffer<InfectionData>(context.Persons.Items.Length, context.Persons.Bins);
+            context.VirusData.ForAll(buffer =>
             {
-                if (d.ID<infected)
+                for (int i = 0; i < buffer.Length; i++)
                 {
-                    d.IsInfected = true;
+                    buffer.Span[i].ID = i;
+                    if (i<infected)
+                    {
+                        buffer.Span[i].IsInfected = true;
+                    }
                 }
             });
+            //context.VirusData.ForAllParallel((ref InfectionData d) =>
+            //{
+            //    if (d.ID < infected)
+            //    {
+            //        d.IsInfected = true;
+            //    }
+            //});
         }
 
         private void tryInfection(ref InfectionData data)
