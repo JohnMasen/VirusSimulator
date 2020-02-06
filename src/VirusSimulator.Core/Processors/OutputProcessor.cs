@@ -8,7 +8,7 @@ namespace VirusSimulator.Core.Processors
 {
     public class OutputProcessor<TContext>:IProcessor<TContext>  where TContext:RunContext
     {
-        public TimeSpan OutputTimeSpan { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan OutputTimeSpan { get; set; } = TimeSpan.MaxValue;
         public int FrameSkip { get; set; } = 0;
         private int skipCount = 0;
         private long frameCount=0;
@@ -23,14 +23,10 @@ namespace VirusSimulator.Core.Processors
         {
             frameCount++;
 
-            if (skipCount > FrameSkip)
-            {
-                skipCount = 0;
-            }
-            if (sw.Elapsed > OutputTimeSpan || skipCount == 0)
+            if (sw.Elapsed > OutputTimeSpan || skipCount >= FrameSkip)
             {
 
-                skipCount = 1;
+                skipCount = 0;
                 output(context,frameCount);
                 sw.Restart();
             }

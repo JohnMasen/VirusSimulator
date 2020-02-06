@@ -12,8 +12,8 @@ namespace VirusSimulator.Core
         private Memory<T> buffer;
         public ReadOnlyMemory<T> Items { get; private set; }
         public delegate void ForAllDelegate(ref T item);
-        
-        List<Memory<T>> blocks = new List<Memory<T>>();
+
+        readonly List<Memory<T>> blocks = new List<Memory<T>>();
 
         public int Bins => blocks.Count;
 
