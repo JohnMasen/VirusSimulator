@@ -8,8 +8,8 @@ namespace VirusSimulator.Person
 {
     public class SimplePerson : IPerson
     {
+        public Runtime Runtime { get; set; }
         private Matrix3x2 transform = Matrix3x2.Identity;
-        public DateTime Now { get; private set; }
         public float Speed { get; set; } = 3f;
 
         public bool IsInfected { get; set; } = false;
@@ -24,10 +24,9 @@ namespace VirusSimulator.Person
 
         public Dictionary<string, IVirus> Viruses { get; } = new Dictionary<string, IVirus>();
 
-        public void Init(int id, DateTime now, Vector2 position)
+        public void Init(int id,  Vector2 position)
         {
             ID = id;
-            Now = now;
             Move(position);
         }
 
@@ -37,13 +36,18 @@ namespace VirusSimulator.Person
             //x *= Matrix3x2.CreateRotation(Helper.NextRandom(Helper.TwoPI));
             //x *= Matrix3x2.CreateTranslation(Position);
             //Position = transform.Translation;
-            Rotate(Helper.NextRandom(Helper.TwoPI));
-            Move(0, Speed);
+            //Rotate(Helper.NextRandom(Helper.TwoPI));
+            //Move(0, Helper.NextRandom(Speed));
         }
 
         protected void Move(Vector2 vector)
         {
+            
             Move(vector.X, vector.Y);
+            if (Position.X<0 || Position.Y<0 || Position.X>Runtime.Area.Size.X || Position.Y>Runtime.Area.Size.Y)
+            {
+                Move(-vector.X, - vector.Y);
+            }
         }
         protected void Move(float x, float y)
         {
@@ -53,5 +57,7 @@ namespace VirusSimulator.Person
         {
             transform =  Matrix3x2.CreateRotation(radius)*transform;
         }
+
+        
     }
 }

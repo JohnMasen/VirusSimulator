@@ -10,6 +10,8 @@ namespace VirusSimulator.Area
 {
     public class SimpleArea : IArea
     {
+
+        public Runtime Runtime { get; set; }
         Random r = new Random();
 
         public Vector2 Size { get; private set; }
