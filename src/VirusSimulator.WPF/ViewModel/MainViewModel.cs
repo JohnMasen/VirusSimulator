@@ -25,7 +25,7 @@ namespace VirusSimulator.WPF.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private const int PersonCount = 10000;
+        public int PersonCount { get; set; } = 10000;
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
 
