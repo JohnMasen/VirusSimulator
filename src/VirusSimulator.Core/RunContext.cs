@@ -23,8 +23,7 @@ namespace VirusSimulator.Core
         public static T CreateInstance<T>(int personCount, DateTime clock, SizeF size, int bins = 10) where T:RunContext,new()
         {
             T result = new T();
-            int id = 0;
-            result.Persons = new DataBuffer<Person>(personCount, bins,()=>new Person() { Transform = Matrix3x2.Identity ,ID=id++});
+            result.Persons = new DataBuffer<Person>(personCount, bins,index=>new Person() { Transform = Matrix3x2.Identity ,ID=index});
             result.WorldClock = clock;
             result.Size = size;
             result.Init();

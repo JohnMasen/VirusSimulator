@@ -17,12 +17,12 @@ namespace VirusSimulator.Core
 
         public int Bins => blocks.Count;
 
-        public DataBuffer(int size, int bins,Func<T> creationCallback)
+        public DataBuffer(int size, int bins,Func<int,T> creationCallback)
         {
             T[] data = new T[size];
             for (int i = 0; i < data.Length; i++)
             {
-                data[i] = creationCallback();
+                data[i] = creationCallback(i);
             }
             initFromArray(data, bins);
         }

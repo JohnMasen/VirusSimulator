@@ -41,25 +41,10 @@ namespace VirusSimulator.Core.Test
 
         public void Init(T context)
         {
-            context.VirusData = new DataBuffer<InfectionData>(context.Persons.Items.Length, context.Persons.Bins);
-            context.VirusData.ForAll(buffer =>
+            context.VirusData = new DataBuffer<InfectionData>(context.Persons.Items.Length, context.Persons.Bins,index=>
             {
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    buffer.Span[i].ID = i;
-                    if (i<infected)
-                    {
-                        buffer.Span[i].IsInfected = true;
-                    }
-                }
+                return new InfectionData() { ID = index, IsInfected = index < infected };
             });
-            //context.VirusData.ForAllParallel((ref InfectionData d) =>
-            //{
-            //    if (d.ID < infected)
-            //    {
-            //        d.IsInfected = true;
-            //    }
-            //});
         }
 
         private void tryInfection(ref InfectionData data)
