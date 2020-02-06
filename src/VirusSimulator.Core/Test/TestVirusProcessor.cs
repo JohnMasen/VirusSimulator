@@ -41,14 +41,11 @@ namespace VirusSimulator.Core.Test
 
         public void Init(TestContext context)
         {
-            context.VirusData.ForAllBlocks(block =>
+            context.VirusData.ForAllParallel((ref InfectionData d) =>
             {
-                for (int i = 0; i < block.Span.Length; i++)
+                if (d.ID<infected)
                 {
-                    if (block.Span[i].ID < infected)
-                    {
-                        block.Span[i].IsInfected = true;
-                    }
+                    d.IsInfected = true;
                 }
             });
         }

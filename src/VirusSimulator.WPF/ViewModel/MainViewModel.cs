@@ -124,11 +124,10 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
-                var s = runner.Context.VirusData.Items.Span;
                 int result = 0;
-                for (int i = 0; i < s.Length; i++)
+                foreach (var item in runner.Context.VirusData.Items.Span)
                 {
-                    if (s[i].IsInfected)
+                    if (item.IsInfected)
                     {
                         result++;
                     }
