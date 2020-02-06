@@ -10,12 +10,6 @@ namespace VirusSimulator.Core.QuadTree
 {
     public class QuadTreeNode<T>
     {
-        private struct PostionItem<TItem>
-        {
-            public Vector2 Position;
-            public T Item;
-        }
-
         public readonly RectangleF Range;
         public Lazy<List<T>> Items=new Lazy<List<T>>();
         private int capacity;
