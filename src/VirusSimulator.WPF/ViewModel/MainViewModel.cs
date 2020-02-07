@@ -27,7 +27,7 @@ namespace VirusSimulator.WPF.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int PersonCount { get; set; } = 5000;
+        public int PersonCount { get; set; } = 10000;
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
 
@@ -50,7 +50,7 @@ namespace VirusSimulator.WPF.ViewModel
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 1 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(new RandomInterestPointProcessor<TestContext>(10) { Radius = 30 });
+            runner.Processors.Add(new RandomInterestPointProcessor<TestContext>(10) { Radius = 100 });
             runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
             runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 3, OutputTimeSpan = TimeSpan.FromMilliseconds(33) });
             runner.Context.InitRandomPosition();

@@ -33,8 +33,7 @@ namespace VirusSimulator.Processor
                 if (m.IsMovingToTarget==MovingStatusEnum.Idle)
                 {
                     m.IsMovingToTarget = MovingStatusEnum.Moving;
-                    m.CurrentTarget=poi[Helper.RandomInt(pCount - 1)];
-                    //m.CurrentTarget = poi[Helper.RandomInt(pCount - 1)] + new Vector2(Helper.RandomFloat(-Radius, Radius));
+                    m.CurrentTarget = poi[Helper.RandomInt(pCount - 1)] + new Vector2(Helper.RandomFloat(-Radius, Radius),Helper.RandomFloat(-Radius,Radius));
                 }
             });
         }
