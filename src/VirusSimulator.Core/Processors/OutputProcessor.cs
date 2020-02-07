@@ -17,6 +17,7 @@ namespace VirusSimulator.Core.Processors
         public OutputProcessor(Action<TContext, long> callback)
         {
             output = callback;
+            sw.Start();
         }
 
         public void Process(TContext context, TimeSpan span)

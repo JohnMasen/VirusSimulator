@@ -47,7 +47,7 @@ namespace VirusSimulator.WPF.ViewModel
             runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
             runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
-            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10 });
+            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = int.MaxValue, OutputTimeSpan=TimeSpan.FromMilliseconds(33) });
         }
 
 
