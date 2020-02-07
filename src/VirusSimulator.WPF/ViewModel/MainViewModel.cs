@@ -50,9 +50,9 @@ namespace VirusSimulator.WPF.ViewModel
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 1 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(new RandomInterestPointProcessor<TestContext>(10) { Radius = 100 });
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10,100));
             runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
-            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 3, OutputTimeSpan = TimeSpan.FromMilliseconds(33) });
+            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10, OutputTimeSpan = TimeSpan.FromMilliseconds(33) });
             runner.Context.InitRandomPosition();
         }
 
