@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
+    <ProjectReference Include="..\VirusSimulator.Processor\VirusSimulator.Processor.csproj" />
   </ItemGroup>
 
 </Project>

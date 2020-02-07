@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Buffers;
 
 namespace VirusSimulator.Core
 {
@@ -11,10 +12,10 @@ namespace VirusSimulator.Core
     {
         private Memory<T> buffer;
         public ReadOnlyMemory<T> Items { get; private set; }
-        public delegate void ForAllDelegate(ref T item);
+        public delegate void EditItemDelegate(ref T item);
 
         readonly List<Memory<T>> blocks = new List<Memory<T>>();
-
+        //private List<MemoryHandle> mh = new List<MemoryHandle>();
         public int Bins => blocks.Count;
 
         public DataBuffer(int size, int bins,Func<int,T> creationCallback)
@@ -25,6 +26,7 @@ namespace VirusSimulator.Core
                 data[i] = creationCallback(i);
             }
             initFromArray(data, bins);
+            //mh.Add(buffer.Pin());
         }
         public DataBuffer(int size, int bins) : this(new T[size], bins)
         { 
@@ -57,6 +59,10 @@ namespace VirusSimulator.Core
                 pos += binSize;
                 size -= binSize;
             }
+            //foreach (var item in blocks)
+            //{
+            //    mh.Add(item.Pin());
+            //}
         }
 
         public void ForAllBlocks(Action<Memory<T>> a)
@@ -66,7 +72,7 @@ namespace VirusSimulator.Core
                 a(block);
             });
         }
-        public void ForAllParallel(ForAllDelegate a)
+        public void ForAllParallel(EditItemDelegate a)
         {
             blocks.AsParallel().ForAll(block =>
             {
@@ -78,13 +84,20 @@ namespace VirusSimulator.Core
             });
         }
 
+        public void Update(int index,EditItemDelegate a)
+        {
+            a(ref buffer.Span[index]);
+        }
+
+        
+
 
         public void ForAll(Action<Memory<T>> action)
         {
             (action ?? throw new ArgumentNullException(nameof(action))).Invoke(buffer);
         }
 
-        public void ForAll(ForAllDelegate action)
+        public void ForAll(EditItemDelegate action)
         {
             var s = buffer.Span;
             for (int i = 0; i < buffer.Length; i++)
