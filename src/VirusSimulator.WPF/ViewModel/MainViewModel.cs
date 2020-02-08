@@ -19,6 +19,12 @@ using VirusSimulator.Core.Processors;
 using VirusSimulator.Core.Test;
 using VirusSimulator.Processor.Test;
 using VirusSimulator.Processor;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using VirusSimulator.ImageOutputProcessor;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
+using SixLabors.Primitives;
 
 namespace VirusSimulator.WPF.ViewModel
 {
@@ -26,13 +32,14 @@ namespace VirusSimulator.WPF.ViewModel
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public int MaxSteps { get; set; } = 200;
 
-        public int PersonCount { get; set; } = 10000;
+        public int PersonCount { get; set; } = 3000;
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
 
         Runner<TestContext> runner;
-
+        Image<Rgba32> gifImage;
         public MainViewModel()
         {
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
@@ -48,14 +55,29 @@ namespace VirusSimulator.WPF.ViewModel
 
             runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
-            //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 1 });
+            //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10,100));
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10, 100));
             runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
-            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10, OutputTimeSpan = TimeSpan.FromMilliseconds(33) });
+            var r = new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10, OutputTimeSpan = TimeSpan.FromMilliseconds(10000) };
+            runner.Processors.Add(r);
+            var tmp = runner.AddGIFOutput(new SixLabors.Primitives.Size(300, 300), drawGifFrame);
+            var gifOutput = tmp.processor;
+            gifOutput.FrameSkip = tmp.processor.FrameSkip;
+            gifOutput.OutputTimeSpan = tmp.processor.OutputTimeSpan;
+            gifImage = tmp.Image;
             runner.Context.InitRandomPosition();
         }
 
+        private void drawGifFrame(IImageProcessingContext image, TestContext context)
+        {
+            image.Fill(Color.White);
+            foreach (var item in (context as IVirusContext).VirusData.Items.Span)
+            {
+                var pos = context.Persons.Items.Span[item.ID].Position;
+                image.Draw(item.IsInfected==InfectionData.Infected?Color.Red:Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(pos,new SizeF(3,3)));
+            }
+        }
 
         public void DoTest()
         {
@@ -106,10 +128,19 @@ namespace VirusSimulator.WPF.ViewModel
 
         private void DoLoop(CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            int currentStep = 0;
+            while (!token.IsCancellationRequested && currentStep++<MaxSteps)
             {
                 runner.Step(TimeSpan.FromHours(1));
             }
+            using (FileStream fs=new FileStream("d:\\temp\\o.gif", FileMode.Create))
+            {
+                Debug.WriteLine("begin output gif");
+                gifImage.Frames.RemoveFrame(0);
+                gifImage.SaveAsGif(fs);
+                Debug.WriteLine("Gif output complete");
+            }
+            
         }
 
 
