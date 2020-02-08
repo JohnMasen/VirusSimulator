@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using VirusSimulator.Core.Processors;
+using System.Linq;
 
 namespace VirusSimulator.Core
 {
@@ -94,7 +95,10 @@ namespace VirusSimulator.Core
             Context.WorldClock += span;
             foreach (var item in Processors)
             {
-                item.Process(Context,span);
+                if (item.EnableProcess)
+                {
+                    item.Process(Context, span);
+                }
             }
         }
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace VirusSimulator.Core.Processors
 {
-    public abstract class OutputProcessorBase<TContext>:IProcessor<TContext>  where TContext:RunContext
+    public abstract class OutputProcessorBase<TContext>:ProcessorBase<TContext>  where TContext:RunContext
     {
         public TimeSpan OutputTimeSpan { get; set; } = TimeSpan.MaxValue;
         public int FrameSkip { get; set; } = 0;
@@ -16,12 +16,11 @@ namespace VirusSimulator.Core.Processors
 
         public OutputProcessorBase()
         {
-
             sw.Start();
         }
         protected abstract void Output(TContext context, long frame);
         
-        public void Process(TContext context, TimeSpan span)
+        public override void Process(TContext context, TimeSpan span)
         {
             frameCount++;
 
@@ -38,14 +37,5 @@ namespace VirusSimulator.Core.Processors
             }
         }
 
-        public virtual void Init(TContext context)
-        {
-            
-        }
-
-        public virtual void Close(TContext context)
-        {
-
-        }
     }
 }

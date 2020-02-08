@@ -7,23 +7,12 @@ using VirusSimulator.Processor.Test;
 
 namespace VirusSimulator.Processor
 {
-	public class PersonMoveProcessor<T> : IProcessor<T> where T : RunContext, IPersonMoveContext
+	public class PersonMoveProcessor<T> : ProcessorBase<T> where T : RunContext, IPersonMoveContext
 	{
 		public float Speed { get; set; } = 5f;
 
-		public void Init(T context)
-		{
-			//context.MoveStatus.ForAllParallel((ref MoveStatus m) =>
-			//{
-			//	m.Status = MoveStatusEnum.MovingToTarget;
-			//	m.CurrentTarget = new Vector2(100, 100);
-			//});
-		}
-		public void Close(T context)
-		{
-
-		}
-		public void Process(T context, TimeSpan span)
+		
+		public override void Process(T context, TimeSpan span)
 		{
 			float d = Speed*Speed;
 			context.Persons.ForAllParallel((ref PositionItem p) =>

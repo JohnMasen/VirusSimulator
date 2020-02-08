@@ -20,7 +20,7 @@ namespace VirusSimulator.Processor.Test
         public const byte Infected = 0x1;
         public const byte NotInfected = 0x0;
     }
-    public class TestVirusProcessor<T> : IProcessor<T> where T: notnull,RunContext, IVirusContext
+    public class TestVirusProcessor<T> : ProcessorBase<T> where T: notnull,RunContext, IVirusContext
     {
         public float InfectionRadius { get; set; } = 5f;
         QuadTreeNode<PositionItem> index;
@@ -29,7 +29,7 @@ namespace VirusSimulator.Processor.Test
         {
             infected = infectedCount;
         }
-        public void Process(T context, TimeSpan span)
+        public override void Process(T context, TimeSpan span)
         {
             _ = context ?? throw new ArgumentNullException(nameof(context));
             index = PositionItem.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
@@ -62,17 +62,13 @@ namespace VirusSimulator.Processor.Test
 
             //context.VirusData.ForAll()
         }
-        public void Init(T context)
+        public override void Init(T context)
         {
             context.VirusData.ForAllParallel((ref InfectionData inf) =>
             {
                 inf.IsInfected = inf.ID < infected ? InfectionData.Infected : InfectionData.NotInfected;
                 inf.IsInfectedNext = inf.IsInfected;
             });
-        }
-        public void Close(T context)
-        {
-
         }
 
 

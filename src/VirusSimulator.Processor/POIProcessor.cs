@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace VirusSimulator.Processor
 {
-    public class POIProcessor<T> : IProcessor<T> where T : RunContext, IPersonMoveContext
+    public class POIProcessor<T> : ProcessorBase<T> where T : RunContext, IPersonMoveContext
     {
         private List<Vector2> poi = new List<Vector2>();
         public float Radius { get; set; } = 300f;
@@ -17,16 +17,12 @@ namespace VirusSimulator.Processor
         {
             create = createPOI;
         }
-        public void Close(T context)
-        {
-
-        }
-        public void Init(T context)
+        public override void Init(T context)
         {
             poi.AddRange(create(context));
         }
 
-        public void Process(T context, TimeSpan span)
+        public override void Process(T context, TimeSpan span)
         {
             context.MoveStatus.ForAllParallel((ref MoveStatus m) =>
             {
