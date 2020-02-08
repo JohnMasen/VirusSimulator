@@ -32,14 +32,15 @@ namespace VirusSimulator.WPF.ViewModel
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public int MaxSteps { get; set; } = 200;
 
+        public string GIFOutputPath { get; set; } = "d:\\temp\\o.gif";
+        public int MaxSteps { get; set; } = 200;
+        public TimeSpan StepGap { get; set; } = TimeSpan.FromHours(1);
         public int PersonCount { get; set; } = 3000;
         CancellationTokenSource cts;
         List<ScatterPoint> points = new List<ScatterPoint>();
 
         Runner<TestContext> runner;
-        Image<Rgba32> gifImage;
         public MainViewModel()
         {
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
@@ -50,23 +51,9 @@ namespace VirusSimulator.WPF.ViewModel
             colorAxe.Palette.Colors.Clear();
             colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0, 255, 0));
             colorAxe.Palette.Colors.Add(OxyColor.FromRgb(255, 0, 0));
-
             PlotModel.Axes.Add(colorAxe);
 
-            runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
-            //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
-            //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
-            runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10, 100));
-            runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
-            var r = new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10, OutputTimeSpan = TimeSpan.FromMilliseconds(10000) };
-            runner.Processors.Add(r);
-            var tmp = runner.AddGIFOutput(new SixLabors.Primitives.Size(300, 300), drawGifFrame);
-            var gifOutput = tmp.processor;
-            gifOutput.FrameSkip = tmp.processor.FrameSkip;
-            gifOutput.OutputTimeSpan = tmp.processor.OutputTimeSpan;
-            gifImage = tmp.Image;
-            runner.Context.InitRandomPosition();
+            
         }
 
         private void drawGifFrame(IImageProcessingContext image, TestContext context)
@@ -81,32 +68,60 @@ namespace VirusSimulator.WPF.ViewModel
 
         public void DoTest()
         {
-            doStep();
+            //doStep();
         }
 
         public void DoTestStart()
         {
-            if (cts != null)
+            if (runner!=null)
             {
                 return;
             }
-            cts = new CancellationTokenSource();
-            Task.Factory.StartNew(() =>
+            runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
+            //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
+            //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
+            runner.Processors.Add(new PersonMoveProcessor<TestContext>());
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10, 100));
+            runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
+
+            var r = new SimpleOutputProcessor<TestContext>(renderResult) { FrameSkip = 10, OutputTimeSpan = TimeSpan.FromMilliseconds(10000) };
+            runner.OutputProcessors.Add(r);
+
+            var tmp = new GIFOutput<TestContext>(new SixLabors.Primitives.Size(300, 300), drawGifFrame,GIFOutputPath);
+            tmp.FrameSkip = r.FrameSkip;
+            tmp.OutputTimeSpan = r.OutputTimeSpan;
+            runner.OnStep += Runner_OnStep;
+
+            runner.Context.InitRandomPosition();
+            runner.Start(StepGap);
+            //if (cts != null)
+            //{
+            //    return;
+            //}
+            //cts = new CancellationTokenSource();
+            //Task.Factory.StartNew(() =>
+            //{
+            //    DoLoop(cts.Token);
+            //}, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+        private void Runner_OnStep(object sender, StepInfo e)
+        {
+            if (e.FrameIndex>=MaxSteps)
             {
-                DoLoop(cts.Token);
-            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                e.IsCancel = true;
+            }
         }
 
         public void DoTestStop()
         {
-            cts?.Cancel();
-            cts = null;
+            runner?.Stop();
+            runner = null;
         }
-        private void doStep()
-        {
-            runner.Step(TimeSpan.FromHours(1));
-            renderResult(runner.Context,0);
-        }
+        //private void doStep()
+        //{
+            
+        //}
 
         private void renderResult(TestContext c,long frameCount)
         {
@@ -126,22 +141,22 @@ namespace VirusSimulator.WPF.ViewModel
 
         }
 
-        private void DoLoop(CancellationToken token)
-        {
-            int currentStep = 0;
-            while (!token.IsCancellationRequested && currentStep++<MaxSteps)
-            {
-                runner.Step(TimeSpan.FromHours(1));
-            }
-            using (FileStream fs=new FileStream("d:\\temp\\o.gif", FileMode.Create))
-            {
-                Debug.WriteLine("begin output gif");
-                gifImage.Frames.RemoveFrame(0);
-                gifImage.SaveAsGif(fs);
-                Debug.WriteLine("Gif output complete");
-            }
+        //private void DoLoop(CancellationToken token)
+        //{
+        //    int currentStep = 0;
+        //    while (!token.IsCancellationRequested && currentStep++<MaxSteps)
+        //    {
+        //        runner.Step(TimeSpan.FromHours(1));
+        //    }
+        //    using (FileStream fs=new FileStream("d:\\temp\\o.gif", FileMode.Create))
+        //    {
+        //        Debug.WriteLine("begin output gif");
+        //        gifImage.Frames.RemoveFrame(0);
+        //        gifImage.SaveAsGif(fs);
+        //        Debug.WriteLine("Gif output complete");
+        //    }
             
-        }
+        //}
 
 
         public PlotModel PlotModel { get; } = new PlotModel();
@@ -150,6 +165,10 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
+                if (runner==null)
+                {
+                    return 0;
+                }
                 return (runner.Context as IVirusContext).GetInfectedCount();
             }
         }
@@ -158,6 +177,10 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
+                if (runner==null)
+                {
+                    return DateTime.Today;
+                }
                 return runner.Context.WorldClock;
             }
         }

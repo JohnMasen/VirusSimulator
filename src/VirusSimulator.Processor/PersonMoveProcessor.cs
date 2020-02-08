@@ -19,7 +19,10 @@ namespace VirusSimulator.Processor
 			//	m.CurrentTarget = new Vector2(100, 100);
 			//});
 		}
+		public void Close(T context)
+		{
 
+		}
 		public void Process(T context, TimeSpan span)
 		{
 			float d = Speed*Speed;

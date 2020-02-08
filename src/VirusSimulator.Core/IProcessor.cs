@@ -9,5 +9,7 @@ namespace VirusSimulator.Core
         void Process(T context,TimeSpan span);
 
         void Init(T context);
+
+        void Close(T context);
     }
 }

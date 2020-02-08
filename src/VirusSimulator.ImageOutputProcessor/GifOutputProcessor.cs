@@ -4,6 +4,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Text;
 using VirusSimulator.Core;
@@ -11,15 +12,17 @@ using VirusSimulator.Core.Processors;
 
 namespace VirusSimulator.ImageOutputProcessor
 {
-    public class GIFOutput<T> where T:RunContext
+    public class GIFOutput<T>:OutputProcessorBase<T> where T:RunContext
     {
-        public Image<Rgba32> Image { get; }
-        Action<IImageProcessingContext,T> p;
-        bool isFirst = true;
-        public GIFOutput(Size outputSize, Action<IImageProcessingContext,T> process)
+        private Image<Rgba32> Image { get; }
+
+        private Action<IImageProcessingContext,T> p;
+        private string path;
+        public GIFOutput(Size outputSize, Action<IImageProcessingContext,T> renderAction,string outputPath)
         {
             Image = new Image<Rgba32>(outputSize.Width, outputSize.Height);
-            p = process;
+            p = renderAction;
+            path = outputPath;
         }
 
         public void Process(T context, long frameId)
@@ -38,16 +41,19 @@ namespace VirusSimulator.ImageOutputProcessor
             }
             Image.Frames.AddFrame(buffer.Frames[0]);
         }
+
+        protected override void Output(T context, long frame)
+        {
+            Image.Frames.RemoveFrame(0);//remove first empty frame;
+            using (FileStream fs= new FileStream(path, FileMode.Create))
+            {
+                Image.SaveAsGif(fs);
+            }
+            
+        }
+
+        
     }
 
-    public static class GIFOutputHelper
-    {
-        public static (OutputProcessor<T> processor, Image<Rgba32> Image) AddGIFOutput<T>(this Runner<T> r, Size size, Action<IImageProcessingContext,T> renderCallback) where T : RunContext,new()
-        {
-            var tmp = new GIFOutput<T>(size, renderCallback);
-            OutputProcessor<T> result = new OutputProcessor<T>(tmp.Process);
-            r.Processors.Add(result);
-            return (result,tmp.Image);
-        }
-    }
+    
 }

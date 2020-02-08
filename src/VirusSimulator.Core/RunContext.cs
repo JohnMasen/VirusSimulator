@@ -14,6 +14,7 @@ namespace VirusSimulator.Core
         public DateTime WorldClock { get; set; } 
         public SizeF Size { get;  set; }
 
+        private Dictionary<string, object> states = new Dictionary<string, object>();
         
         protected virtual void Init()
         {
@@ -30,7 +31,20 @@ namespace VirusSimulator.Core
             return result;
         }
 
+        public void SetState(string key,object value)
+        {
+            states.Add(key, value);
+        }
         
+        public object GetState(string key)
+        {
+            return states[key];
+        }
+
+        public void ClearState(string key)
+        {
+            states.Remove(key);
+        }
 
     }
 }

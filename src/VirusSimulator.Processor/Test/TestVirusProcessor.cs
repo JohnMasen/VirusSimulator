@@ -70,8 +70,11 @@ namespace VirusSimulator.Processor.Test
                 inf.IsInfectedNext = inf.IsInfected;
             });
         }
+        public void Close(T context)
+        {
 
-        
+        }
+
 
     }
 }

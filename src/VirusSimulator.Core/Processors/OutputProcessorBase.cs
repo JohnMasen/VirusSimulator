@@ -6,20 +6,21 @@ using System.Text;
 
 namespace VirusSimulator.Core.Processors
 {
-    public class OutputProcessor<TContext>:IProcessor<TContext>  where TContext:RunContext
+    public abstract class OutputProcessorBase<TContext>:IProcessor<TContext>  where TContext:RunContext
     {
         public TimeSpan OutputTimeSpan { get; set; } = TimeSpan.MaxValue;
         public int FrameSkip { get; set; } = 0;
         private int skipCount = 0;
         private long frameCount=0;
         private Stopwatch sw = new Stopwatch();
-        Action<TContext, long> output;
-        public OutputProcessor(Action<TContext, long> callback)
+
+        public OutputProcessorBase()
         {
-            output = callback;
+
             sw.Start();
         }
-
+        protected abstract void Output(TContext context, long frame);
+        
         public void Process(TContext context, TimeSpan span)
         {
             frameCount++;
@@ -28,7 +29,7 @@ namespace VirusSimulator.Core.Processors
             {
 
                 skipCount = 0;
-                output(context,frameCount);
+                Output(context, frameCount);
                 sw.Restart();
             }
             else
@@ -37,9 +38,14 @@ namespace VirusSimulator.Core.Processors
             }
         }
 
-        public void Init(TContext context)
+        public virtual void Init(TContext context)
         {
             
+        }
+
+        public virtual void Close(TContext context)
+        {
+
         }
     }
 }

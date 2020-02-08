@@ -17,7 +17,10 @@ namespace VirusSimulator.Processor
         {
             create = createPOI;
         }
+        public void Close(T context)
+        {
 
+        }
         public void Init(T context)
         {
             poi.AddRange(create(context));

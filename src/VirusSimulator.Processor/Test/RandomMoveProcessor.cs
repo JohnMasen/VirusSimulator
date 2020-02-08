@@ -14,7 +14,10 @@ namespace VirusSimulator.Processor.Test
         public void Init(T context)
         {
         }
+        public void Close(T context)
+        {
 
+        }
         //private TestContext context;
 
         public void Process(T context,TimeSpan span)
