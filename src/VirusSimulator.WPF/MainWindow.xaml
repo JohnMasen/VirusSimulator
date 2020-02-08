@@ -7,14 +7,14 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors" x:Class="VirusSimulator.WPF.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" DataContext="{Binding Main, Mode=OneWay, Source={StaticResource VMLocator}}">
+        Title="MainWindow" Height="750" Width="788" Loaded="Window_Loaded" DataContext="{Binding Main, Mode=OneWay, Source={StaticResource VMLocator}}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="33*"/>
             <RowDefinition Height="184*"/>
         </Grid.RowDefinitions>
         <oxy:PlotView x:Name="PlotView" Grid.Row="1" Model="{Binding PlotModel, Mode=OneWay}" >
-            
+
         </oxy:PlotView>
         <Button Content="Button" HorizontalAlignment="Left" Margin="478,0,0,0" VerticalAlignment="Center">
             <b:Interaction.Triggers>

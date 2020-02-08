@@ -23,8 +23,6 @@ namespace VirusSimulator.Core.Test
             {
                 return new MoveStatus() { ID = index, CurrentTarget=Vector2.Zero, IsMovingToTarget = MovingStatusEnum.Idle };
             });
-
-            
         }
 
         public void InitRandomPosition()
@@ -32,6 +30,16 @@ namespace VirusSimulator.Core.Test
             Persons.ForAllParallel((ref PositionItem p) =>
             {
                 p.Move(Helper.RandomFloat(Size.Width), Helper.RandomFloat(Size.Height));
+            });
+        }
+
+        public void InitCirclePosition(Vector2 center,float radias)
+        {
+            Persons.ForAllParallel((ref PositionItem p) =>
+            {
+                p.MoveTo(center);
+                p.Rotate(Helper.RandomFloat(Helper.TwoPI));
+                p.Move(0, Helper.RandomFloat(radias));
             });
         }
     }

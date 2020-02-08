@@ -33,7 +33,8 @@ namespace VirusSimulator.Processor
 					else
 					{
 						Vector2 direction = Vector2.Normalize(currentTarget - p.Position);
-						p.Move(direction * Speed);
+						Vector2 newPos = p.Position + direction * Speed;
+						p.MoveTo(newPos);
 					}
 				}
 			});
