@@ -9,7 +9,6 @@ namespace VirusSimulator.Core
 {
     public struct PositionItem
     {
-        public int ID;
         public Vector2 Position;
         public Matrix3x2 Transform;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using VirusSimulator.Processor;
@@ -15,10 +16,7 @@ namespace VirusSimulator.Core.Test
         protected override void Init()
         {
             base.Init();
-            (this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins, index =>
-            {
-                return new InfectionData() { ID = index };
-            });
+            (this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
             (this as IPersonMoveContext).MoveStatus = new DataBuffer<MoveStatus>(Persons.Items.Length, Persons.Bins, (index) =>
             {
                 return new MoveStatus() { ID = index, CurrentTarget=Vector2.Zero, IsMovingToTarget = MovingStatusEnum.Idle };
@@ -27,15 +25,16 @@ namespace VirusSimulator.Core.Test
 
         public void InitRandomPosition()
         {
-            Persons.ForAllParallel((ref PositionItem p) =>
+            Persons.ForAllParallel((int index,ref PositionItem p) =>
             {
+                //Debug.WriteLine($"init {index}");
                 p.Move(Helper.RandomFloat(Size.Width), Helper.RandomFloat(Size.Height));
             });
         }
 
         public void InitCirclePosition(Vector2 center,float radias)
         {
-            Persons.ForAllParallel((ref PositionItem p) =>
+            Persons.ForAllParallel((int index,ref PositionItem p) =>
             {
                 p.MoveTo(center);
                 p.Rotate(Helper.RandomFloat(Helper.TwoPI));

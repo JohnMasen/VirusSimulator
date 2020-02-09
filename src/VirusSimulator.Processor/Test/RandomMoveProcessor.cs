@@ -15,7 +15,7 @@ namespace VirusSimulator.Processor.Test
 
         public override void Process(T context,TimeSpan span)
         {
-            (context??throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((ref PositionItem person)=>
+            (context??throw new ArgumentNullException(nameof(context))).Persons.ForAllParallel((int _,ref PositionItem person)=>
             {
                 (Matrix3x2 transform, Vector2 position) previous = (person.Transform, person.Position);
                 float r = Helper.RandomFloat(Helper.TwoPI);

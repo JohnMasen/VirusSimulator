@@ -24,7 +24,7 @@ namespace VirusSimulator.Processor
 
         public override void Process(T context, TimeSpan span)
         {
-            context.MoveStatus.ForAllParallel((ref MoveStatus m) =>
+            context.MoveStatus.ForAllParallel((int _,ref MoveStatus m) =>
             {
                 if (m.IsMovingToTarget == MovingStatusEnum.Idle)
                 {

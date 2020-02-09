@@ -36,35 +36,39 @@ namespace VirusSimulator.WPF.ViewModel
         public string GIFOutputPath { get; set; } = "d:\\temp\\o.gif";
         public int MaxSteps { get; set; } = int.MaxValue;
         public TimeSpan StepGap { get; set; } = TimeSpan.FromHours(1);
-        public int PersonCount { get; set; } = 7000;
-        CancellationTokenSource cts;
+        public int PersonCount { get; set; } = 10000;
         List<ScatterPoint> points = new List<ScatterPoint>();
         public int MapSize { get; set; } = 2000;
 
         Runner<TestContext> runner;
         public MainViewModel()
         {
+            //PlotModel.Background = OxyColors.Black;
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
             PlotModel.Axes.Clear();
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = MapSize });
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = MapSize, Position = AxisPosition.Bottom });
             var colorAxe = new LinearColorAxis() { Minimum = 0, Maximum = 1, Position = AxisPosition.Top };
             colorAxe.Palette.Colors.Clear();
-            colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0, 255, 0));
-            colorAxe.Palette.Colors.Add(OxyColor.FromRgb(255, 0, 0));
+            colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0,255,0));
+            colorAxe.Palette.Colors.Add(OxyColors.Red);
             PlotModel.Axes.Add(colorAxe);
-
             
         }
 
         private void drawGifFrame(IImageProcessingContext image, TestContext context)
         {
-            image.Fill(Color.White);
-            foreach (var item in (context as IVirusContext).VirusData.Items.Span)
-            {
-                var pos = context.Persons.Items.Span[item.ID].Position;
-                image.Draw(item.IsInfected==InfectionData.Infected?Color.Red:Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(pos,new SizeF(3,3)));
-            }
+            //image.Fill(Color.White);
+
+            (context as IVirusContext).VirusData.ForAllWtihReference(context.Persons, (ref InfectionData infection, ref PositionItem p) =>
+             {
+                 image.Draw(infection.IsInfected == InfectionData.Infected ? Color.Red : Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(3, 3)));
+             });
+            //foreach (var item in (context as IVirusContext).VirusData.Items.Span)
+            //{
+            //    var pos = context.Persons.Items.Span[item.Index].Position;
+            //    image.Draw(item.IsInfected==InfectionData.Infected?Color.Red:Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(pos,new SizeF(3,3)));
+            //}
         }
 
         public void DoTest()
@@ -78,12 +82,12 @@ namespace VirusSimulator.WPF.ViewModel
             {
                 return;
             }
-            runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(MapSize, MapSize));
+            runner = new Runner<TestContext>(PersonCount, 0, new System.Drawing.SizeF(MapSize, MapSize));
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(3, 30));
-            //runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(10, 400));
+            runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
 
             var r = new SimpleOutputProcessor<TestContext>(renderResult) { FrameSkip = 2, OutputTimeSpan = TimeSpan.FromMilliseconds(10000) };
             runner.OutputProcessors.Add(r);
@@ -95,8 +99,8 @@ namespace VirusSimulator.WPF.ViewModel
 
             runner.OnStep += Runner_OnStep;
 
-            //runner.Context.InitRandomPosition();
-            runner.Context.InitCirclePosition(new System.Numerics.Vector2(runner.Context.Size.Width/2, runner.Context.Size.Height/2), 400);
+            runner.Context.InitRandomPosition();
+            //runner.Context.InitCirclePosition(new System.Numerics.Vector2(runner.Context.Size.Width/2, runner.Context.Size.Height/2), 400);
             runner.Start(StepGap);
             
         }
@@ -120,11 +124,16 @@ namespace VirusSimulator.WPF.ViewModel
         {
             points.Clear();
 
-            var vData = (c as IVirusContext).VirusData.Items.Span;
-            foreach (var item in c.Persons.Items.Span)
-            {
-                points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.ID].IsInfected==InfectionData.Infected ? 1 : 0));
-            }
+            //var vData = (c as IVirusContext).VirusData.Items.Span;
+            //foreach (var item in c.Persons.Items.Span)
+            //{
+            //    points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.Index].IsInfected==InfectionData.Infected ? 1 : 0));
+            //}
+
+            c.Persons.ForAllWtihReference((c as IVirusContext).VirusData, (ref PositionItem p, ref InfectionData infection) =>
+             {
+                 points.Add(new ScatterPoint(p.Position.X, p.Position.Y, double.NaN, infection.IsInfected == InfectionData.Infected ? 1 : 0));
+             });
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 PlotModel.InvalidatePlot(false);
