@@ -9,6 +9,7 @@
     <Compile Remove="IPerson.cs" />
     <Compile Remove="IRuntimeObject.cs" />
     <Compile Remove="IVirus.cs" />
+    <Compile Remove="Processors\OutputProcessorBase.cs" />
     <Compile Remove="Runtime.cs" />
     <Compile Remove="Simulator.cs" />
   </ItemGroup>

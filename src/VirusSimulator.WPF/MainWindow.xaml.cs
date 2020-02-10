@@ -1,4 +1,6 @@
 ﻿using OxyPlot.Series;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VirusSimulator.WPF.ViewModel;
 
 namespace VirusSimulator.WPF
 {
@@ -21,6 +22,7 @@ namespace VirusSimulator.WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             InitializeComponent();
@@ -28,7 +30,16 @@ namespace VirusSimulator.WPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //var xx = PlotView.Series[0] as OxyPlot.Wpf.ScatterSeries;
+            //image1.Source = s.Source;
+            ////var xx = PlotView.Series[0] as OxyPlot.Wpf.ScatterSeries;
+            //s.Draw(op =>
+            //{
+            //    op.Fill(SixLabors.ImageSharp.Color.Red);
+            //});
+            var p = (this.DataContext as MainViewModel);
+            
         }
+
+        
     }
 }

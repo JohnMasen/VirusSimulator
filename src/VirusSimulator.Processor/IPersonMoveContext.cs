@@ -21,7 +21,7 @@ namespace VirusSimulator.Processor
 
 	public interface IPersonMoveContext
 	{
-		public DataBuffer<MoveStatus> MoveStatus { get; internal set; }
+		public DataBuffer<MoveStatus> MoveStatus { get; set; }
 
 	}
 }

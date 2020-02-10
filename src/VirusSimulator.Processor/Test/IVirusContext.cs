@@ -7,7 +7,7 @@ namespace VirusSimulator.Processor.Test
 {
     public interface IVirusContext
     {
-        public DataBuffer<InfectionData> VirusData { get; internal set; }
+        public DataBuffer<InfectionData> VirusData { get; set; }
 
         public int GetInfectedCount()
         {

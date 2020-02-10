@@ -12,5 +12,6 @@ namespace VirusSimulator.Core
         void Init(T context);
 
         void Close(T context);
+
     }
 }

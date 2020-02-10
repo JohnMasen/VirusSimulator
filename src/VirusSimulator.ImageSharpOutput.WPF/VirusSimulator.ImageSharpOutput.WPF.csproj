@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="CustomControl1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Themes\Generic.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
+    <ProjectReference Include="..\VirusSimulator.ImageSharpOutput\VirusSimulator.ImageSharpOutput.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Themes\" />
+  </ItemGroup>
+
+</Project>

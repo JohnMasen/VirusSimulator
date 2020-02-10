@@ -13,9 +13,14 @@
             <RowDefinition Height="33*"/>
             <RowDefinition Height="184*"/>
         </Grid.RowDefinitions>
-        <oxy:PlotView x:Name="PlotView" Grid.Row="1" Model="{Binding PlotModel, Mode=OneWay}" >
-
-        </oxy:PlotView>
+        <Grid Grid.Row="1" Background="#FFFE9494">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <oxy:PlotView x:Name="PlotView" Model="{Binding PlotModel, Mode=OneWay}" />
+            <Image x:Name="image1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding ImageSource, Mode=OneWay}" Grid.Column="1"/>
+        </Grid>
         <Button Content="Button" HorizontalAlignment="Left" Margin="478,0,0,0" VerticalAlignment="Center">
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="Click">
@@ -39,5 +44,6 @@
         </Button>
         <Label Content="{Binding Infected, Mode=OneWay}" HorizontalAlignment="Left" Margin="643,0,0,0" VerticalAlignment="Center"/>
         <Label Content="{Binding WorldClock, Mode=OneWay}" HorizontalAlignment="Left" Margin="732,23,0,0" VerticalAlignment="Top"/>
+
     </Grid>
 </Window>

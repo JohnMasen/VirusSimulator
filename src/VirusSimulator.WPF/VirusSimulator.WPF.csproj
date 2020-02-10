@@ -14,7 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
-    <ProjectReference Include="..\VirusSimulator.ImageOutputProcessor\VirusSimulator.ImageOutputProcessor.csproj" />
+    <ProjectReference Include="..\VirusSimulator.ImageSharpOutput.WPF\VirusSimulator.ImageSharpOutput.WPF.csproj" />
+    <ProjectReference Include="..\VirusSimulator.ImageSharpOutput\VirusSimulator.ImageSharpOutput.csproj" />
     <ProjectReference Include="..\VirusSimulator.Processor\VirusSimulator.Processor.csproj" />
   </ItemGroup>
 
