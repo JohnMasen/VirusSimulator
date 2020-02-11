@@ -28,10 +28,12 @@
                 <TextBox HorizontalAlignment="Center" Margin="0,33,0,0" Text="{Binding GifOutputPath, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" Height="18" />
                 <TextBox HorizontalAlignment="Left" Margin="1,128,0,0" Text="{Binding MaxSteps, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                 <Label Content="最大迭代次数" HorizontalAlignment="Left" Margin="1,97,0,0" VerticalAlignment="Top"/>
-                <Label Content="{Binding FrameIndex, Mode=OneWay}" HorizontalAlignment="Left" Margin="1,211,0,0" VerticalAlignment="Top"/>
+                <Label Content="{Binding FrameIndex, Mode=OneWay}" HorizontalAlignment="Left" Margin="1,211,0,0" VerticalAlignment="Top" ContentStringFormat="Frame {0}"/>
                 <oxy:Plot Grid.Row="1" InvalidateFlag="{Binding FrameIndex, Mode=OneWay}" >
                     <oxy:AreaSeries ItemsSource="{Binding HisData, Mode=OneWay}"/>
                 </oxy:Plot>
+                <Label Content="最大感染率" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
+                <Slider HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="182" Maximum="100" Value="{Binding MaxInfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" TickFrequency="10" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
             </Grid>
         </Grid>
 
@@ -49,7 +51,7 @@
                 </b:EventTrigger>
             </b:Interaction.Triggers>
         </Button>
-        <Label Content="{Binding Infected, Mode=OneWay}" HorizontalAlignment="Left" Margin="716,29,0,0" VerticalAlignment="Top"/>
+        <Label Content="{Binding Infected, Mode=OneWay}" HorizontalAlignment="Left" Margin="662,79,0,0" VerticalAlignment="Top" ContentStringFormat="感染人数 {0}"/>
         <Label Content="{Binding WorldClock, Mode=OneWay}" HorizontalAlignment="Left" Margin="716,5,0,0" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="237,0,0,0" Text="人数" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <TextBox HorizontalAlignment="Left" Margin="301,70,0,0" Text="{Binding InfectedInit, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
