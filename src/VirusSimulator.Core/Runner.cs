@@ -21,23 +21,11 @@ namespace VirusSimulator.Core
         StepInfo stepInfo;
         
         public event EventHandler<StepInfo> OnStep;
-        //public List<OutputProcessorBase<T>> OutputProcessors { get; private set; } = new List<OutputProcessorBase<T>>();
         public Runner(int personCount,int bins,SizeF areaSize)
         {
             Context = RunContext.CreateInstance<T>(personCount, DateTime.Now, areaSize, bins);
         }
 
-        //private void forAllProcessors(Action<IProcessor<T>> action)
-        //{
-        //    foreach (var item in Processors)
-        //    {
-        //        action(item);
-        //    }
-        //    foreach (var item in OutputProcessors)
-        //    {
-        //        action(item);
-        //    }
-        //}
 
         public void Start(TimeSpan interval)
         {
@@ -69,10 +57,6 @@ namespace VirusSimulator.Core
                             break;
                         }
                     }
-                    //foreach (var item in OutputProcessors)
-                    //{
-                    //    item.Process(Context, interval);
-                    //}
 
                 }
                 Processors.ForEach(x => x.Close(Context));

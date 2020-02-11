@@ -30,13 +30,6 @@ namespace VirusSimulator.WPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //image1.Source = s.Source;
-            ////var xx = PlotView.Series[0] as OxyPlot.Wpf.ScatterSeries;
-            //s.Draw(op =>
-            //{
-            //    op.Fill(SixLabors.ImageSharp.Color.Red);
-            //});
-            var p = (this.DataContext as MainViewModel);
             
         }
 

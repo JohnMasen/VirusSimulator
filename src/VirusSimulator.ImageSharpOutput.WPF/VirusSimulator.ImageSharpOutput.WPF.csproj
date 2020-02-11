@@ -6,20 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AssemblyInfo.cs" />
     <Compile Remove="CustomControl1.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Remove="Themes\Generic.xaml" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
     <ProjectReference Include="..\VirusSimulator.ImageSharpOutput\VirusSimulator.ImageSharpOutput.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Themes\" />
   </ItemGroup>
 
 </Project>

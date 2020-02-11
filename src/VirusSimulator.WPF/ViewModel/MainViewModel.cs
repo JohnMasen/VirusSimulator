@@ -49,7 +49,6 @@ namespace VirusSimulator.WPF.ViewModel
         public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
         public MainViewModel()
         {
-            //PlotModel.Background = OxyColors.Black;
             PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
             PlotModel.Axes.Clear();
             PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = MapSize });
@@ -59,23 +58,8 @@ namespace VirusSimulator.WPF.ViewModel
             colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0,255,0));
             colorAxe.Palette.Colors.Add(OxyColors.Red);
             PlotModel.Axes.Add(colorAxe);
-            //ImageSource = new System.Windows.Media.Imaging.WriteableBitmap(100, 100, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null);
         }
 
-        //private void drawGifFrame(IImageProcessingContext image, TestContext context)
-        //{
-        //    image.Fill(Color.White);
-
-        //    (context as IVirusContext).VirusData.ForAllWtihReference(context.Persons, (ref InfectionData infection, ref PositionItem p) =>
-        //     {
-        //         image.Draw(infection.IsInfected == InfectionData.Infected ? Color.Red : Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(3, 3)));
-        //     });
-        //    //foreach (var item in (context as IVirusContext).VirusData.Items.Span)
-        //    //{
-        //    //    var pos = context.Persons.Items.Span[item.Index].Position;
-        //    //    image.Draw(item.IsInfected==InfectionData.Infected?Color.Red:Color.Green, 1, new SixLabors.Shapes.RectangularPolygon(pos,new SizeF(3,3)));
-        //    //}
-        //}
 
         public void DoTest()
         {
@@ -132,13 +116,6 @@ namespace VirusSimulator.WPF.ViewModel
         {
             runner?.Stop();
             runner = null;
-            //using (var fs=new FileStream("d:\\temp\\test1.bmp",FileMode.Create))
-            //{
-            //    imageProcessor.Image.SaveAsBmp(fs);
-            //}
-            //byte[] b = new byte[MapSize * MapSize * 4];
-            //ImageSource.CopyPixels(b, MapSize * 4, 0);
-            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
 
         }
         private void renderImageResult(IImageProcessingContext img,TestContext context)
@@ -147,7 +124,6 @@ namespace VirusSimulator.WPF.ViewModel
             context.Persons.ForAllParallelWtihReference((context as IVirusContext).VirusData, (ref PositionItem p, ref InfectionData infection) =>
             {
                 img.Draw(infection.IsInfected == InfectionData.Infected ? Color.Red : Color.Green,5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(1, 1)));
-                //points.Add(new ScatterPoint(p.Position.X, p.Position.Y, double.NaN, infection.IsInfected == InfectionData.Infected ? 1 : 0));
             });
         }
         
@@ -156,11 +132,6 @@ namespace VirusSimulator.WPF.ViewModel
         {
             points.Clear();
 
-            //var vData = (c as IVirusContext).VirusData.Items.Span;
-            //foreach (var item in c.Persons.Items.Span)
-            //{
-            //    points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.Index].IsInfected==InfectionData.Infected ? 1 : 0));
-            //}
 
             c.Persons.ForAllWtihReference((c as IVirusContext).VirusData, (ref PositionItem p, ref InfectionData infection) =>
              {

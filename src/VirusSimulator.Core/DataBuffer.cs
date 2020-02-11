@@ -51,27 +51,6 @@ namespace VirusSimulator.Core
             initBlocks(data.Length,bins);
             buffer = data.AsMemory();
             Items = buffer;
-            //int size = data.Length;
-            //int binSize = size / bins;
-            //if (size % bins > 0)
-            //{
-            //    binSize++;
-            //}
-            //int pos = 0;
-            //while (size > 0)
-            //{
-            //    if (binSize > size)
-            //    {
-            //        binSize = size;
-            //    }
-            //    blocks.Add(buffer.Slice(pos, binSize));
-            //    pos += binSize;
-            //    size -= binSize;
-            //}
-            //foreach (var item in blocks)
-            //{
-            //    mh.Add(item.Pin());
-            //}
         }
 
         private void initBlocks(int size, int bins = 0)
