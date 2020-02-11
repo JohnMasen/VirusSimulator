@@ -21,6 +21,7 @@ namespace VirusSimulator.Processor.Test
     }
     public class TestVirusProcessor<T> : ProcessorBase<T> where T: notnull,RunContext, IVirusContext
     {
+        public float InfectionRate { get; set; } = 0.2f;
         public float InfectionRadius { get; set; } = 5f;
         QuadTreeNode<PositionItem> indexer;
         int infected;
@@ -41,20 +42,22 @@ namespace VirusSimulator.Processor.Test
                 }
             }
             //try to infection
-            //context.VirusData.ForAll((int index, ref InfectionData data) =>
-            //{
-            //    if (data.IsInfected == InfectionData.NotInfected)
-            //    {
-            //        var result = indexer.GetItemInDistance(context.Persons.Items.Span[index].Position, InfectionRadius)?.Any();
-            //        data.IsInfectedNext = (result == true) ? InfectionData.Infected : InfectionData.NotInfected;
-            //    }
-            //});
 
             context.VirusData.ForAllParallelWtihReference(context.Persons, (ref InfectionData data, ref PositionItem p) =>
              {
                  if (data.IsInfected == InfectionData.NotInfected)
                  {
-                     var result = indexer.GetItemInDistance(p.Position, InfectionRadius)?.Any();
+                     var items = indexer.GetItemInDistance(p.Position, InfectionRadius);
+                     bool result;
+                     if (items!=null)
+                     {
+                         result = Helper.RandomFloat(1)<= 1- (Math.Pow((1-InfectionRate), items.Count()));
+                     }
+                     else
+                     {
+                         result = false;
+                     }
+                     //bool result = indexer.GetItemInDistance(p.Position, InfectionRadius)?.Sum()>0;
                      data.IsInfectedNext = (result == true) ? InfectionData.Infected : InfectionData.NotInfected;
                  }
              });
