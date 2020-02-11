@@ -14,6 +14,7 @@ namespace VirusSimulator.Core
         public DateTime WorldClock { get; set; } 
         public SizeF Size { get;  set; }
 
+        private Dictionary<string, object> states = new Dictionary<string, object>();
         
         protected virtual void Init()
         {
@@ -23,14 +24,27 @@ namespace VirusSimulator.Core
         public static T CreateInstance<T>(int personCount, DateTime clock, SizeF size, int bins = 10) where T:RunContext,new()
         {
             T result = new T();
-            result.Persons = new DataBuffer<PositionItem>(personCount, bins,index=>new PositionItem() { Transform = Matrix3x2.Identity ,ID=index});
+            result.Persons = new DataBuffer<PositionItem>(personCount, bins,index=>new PositionItem() { Transform = Matrix3x2.Identity});
             result.WorldClock = clock;
             result.Size = size;
             result.Init();
             return result;
         }
 
+        public void SetState(string key,object value)
+        {
+            states.Add(key, value);
+        }
         
+        public object GetState(string key)
+        {
+            return states[key];
+        }
+
+        public void ClearState(string key)
+        {
+            states.Remove(key);
+        }
 
     }
 }

@@ -13,10 +13,21 @@ using System.Windows.Threading;
 using VirusSimulator.Core;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using VirusSimulator.Core.Test;
 using System.Windows.Documents;
 using System.Diagnostics;
 using VirusSimulator.Core.Processors;
+using VirusSimulator.Processor.Test;
+using VirusSimulator.Processor;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
+using SixLabors.Primitives;
+using VirusSimulator.ImageSharpOutput;
+using VirusSimulator.ImageSharpOutput.WPF;
+using System.Windows;
+using VirusSimulator.ImageSharpOutput.Plugins;
+//using System.Windows.Media;
 
 namespace VirusSimulator.WPF.ViewModel
 {
@@ -25,94 +36,143 @@ namespace VirusSimulator.WPF.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int PersonCount { get; set; } = 10000;
-        CancellationTokenSource cts;
-        List<ScatterPoint> points = new List<ScatterPoint>();
+        public int? FrameSkip { get; set; } = 5;
+        public bool? EnableGIFOutput { get; set; } = false;
+        public string GifOutputPath { get; set; } = Environment.CurrentDirectory;
+        public int? MaxSteps { get; set; } = int.MaxValue;
+        public TimeSpan StepGap { get; set; } = TimeSpan.FromHours(1);
+        public int PersonCount { get; set; } = 7000;
+        public int MapSize { get; set; } = 2000;
 
+        public int POICount { get; set; } = 10;
+
+        public int InfectedInit { get; set; } = 3;
+        public float InfectionRate { get; set; } = 0.2f;
+        public float InfectionRadias { get; set; } = 2f;
+        public long FrameIndex { get; private set; }
+
+        public int? MaxInfectionRate { get; set; } = 80;
+
+        private readonly int defaultFrameSkip = 5;
+
+        public List<DataPoint> HisData { get; } = new List<DataPoint>();
         Runner<TestContext> runner;
 
+
+        ImageSharpProcessor<TestContext, Bgra32> imageProcessor;
+        public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
         public MainViewModel()
         {
-            PlotModel.Series.Add(new ScatterSeries() { ItemsSource = points, MarkerSize = 1 });
-            PlotModel.Axes.Clear();
-            PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = 1000 });
-            PlotModel.Axes.Add(new LinearAxis() { Minimum = 0, Maximum = 1000, Position = AxisPosition.Bottom });
-            var colorAxe = new LinearColorAxis() { Minimum = 0, Maximum = 1, Position = AxisPosition.Top };
-            colorAxe.Palette.Colors.Clear();
-            colorAxe.Palette.Colors.Add(OxyColor.FromRgb(0, 255, 0));
-            colorAxe.Palette.Colors.Add(OxyColor.FromRgb(255, 0, 0));
 
-            PlotModel.Axes.Add(colorAxe);
-
-            runner = new Runner<TestContext>(PersonCount, 10, new System.Drawing.SizeF(1000, 1000));
-            runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(new TestVirusProcessor<TestContext>(3) { InfectionRadius = 2f });
-            runner.Processors.Add(new OutputProcessor<TestContext>(renderResult) { FrameSkip = 10 });
         }
 
 
         public void DoTest()
         {
-            doStep();
+            //doStep();
         }
 
         public void DoTestStart()
         {
-            if (cts != null)
+            if (runner != null)
             {
                 return;
             }
-            cts = new CancellationTokenSource();
-            Task.Factory.StartNew(() =>
+            HisData.Clear();
+            runner = new Runner<TestContext>(PersonCount, 0, new System.Drawing.SizeF(MapSize, MapSize));
+            //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
+            //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
+            runner.Processors.Add(new PersonMoveProcessor<TestContext>());
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6));
+            runner.Processors.Add(new TestVirusProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadias, InfectionRate = InfectionRate });
+
+            //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
+            //runner.Processors.Add(r);
+
+            imageProcessor = new ImageSharpProcessor<TestContext, Bgra32>(renderImageResult);
+            runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
+
+            var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
+            ImageSource = s.ImageSource;
+            imageProcessor.Plugins.Add(s);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
+
+            if (EnableGIFOutput == true)
             {
-                DoLoop(cts.Token);
-            }, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+            }
+            runner.Processors.Add(new SimpleProcessor<TestContext>(updateUI)
+                .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
+                );
+
+
+            runner.OnStep += Runner_OnStep;
+
+            runner.Context.InitRandomPosition();
+            //runner.Context.InitCirclePosition(new System.Numerics.Vector2(runner.Context.Size.Width/2, runner.Context.Size.Height/2), 400);
+            runner.Start(StepGap);
+
+        }
+
+        private void raisePropertyChanged(params string[] names)
+        {
+            if (Application.Current.Dispatcher.Thread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId)
+            {
+                foreach (var item in names)
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(item));
+                }
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() => { raisePropertyChanged(names); });
+            }
+        }
+        private void updateUI(TestContext _, TimeSpan __)
+        {
+
+            HisData.Add(new DataPoint(FrameIndex, Infected));
+            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(Infected), nameof(WorldClock));
+        }
+
+        private void Runner_OnStep(object sender, StepInfo e)
+        {
+            if (e.FrameIndex >= MaxSteps || (MaxInfectionRate.HasValue && Infected*100 / PersonCount >= MaxInfectionRate))
+            {
+                e.IsCancel = true;
+                runner = null;
+            }
+            FrameIndex = e.FrameIndex;
+
         }
 
         public void DoTestStop()
         {
-            cts?.Cancel();
-            cts = null;
-        }
-        private void doStep()
-        {
-            runner.Step(TimeSpan.FromHours(1));
-            renderResult(runner.Context,0);
-        }
+            runner?.Stop();
+            runner = null;
 
-        private void renderResult(TestContext c,long frameCount)
+        }
+        private void renderImageResult(IImageProcessingContext img, TestContext context)
         {
-            points.Clear();
-
-            var vData = (c as IVirusContext).VirusData.Items.Span;
-            foreach (var item in c.Persons.Items.Span)
+            img.Fill(Color.White);
+            context.Persons.ForAllParallelWtihReference((context as IVirusContext).VirusData, (ref PositionItem p, ref InfectionData infection) =>
             {
-                points.Add(new ScatterPoint(item.Position.X, item.Position.Y, double.NaN, vData[item.ID].IsInfected ? 1 : 0));
-            }
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                PlotModel.InvalidatePlot(false);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WorldClock)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Infected)));
+                img.Draw(infection.IsInfected == InfectionData.Infected ? Color.Red : Color.Green, 5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(1, 1)));
             });
-
-        }
-
-        private void DoLoop(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
-            {
-                runner.Step(TimeSpan.FromHours(1));
-            }
         }
 
 
-        public PlotModel PlotModel { get; } = new PlotModel();
+
+
 
         public int Infected
         {
             get
             {
+                if (runner == null)
+                {
+                    return 0;
+                }
                 return (runner.Context as IVirusContext).GetInfectedCount();
             }
         }
@@ -121,6 +181,10 @@ namespace VirusSimulator.WPF.ViewModel
         {
             get
             {
+                if (runner == null)
+                {
+                    return DateTime.Today;
+                }
                 return runner.Context.WorldClock;
             }
         }

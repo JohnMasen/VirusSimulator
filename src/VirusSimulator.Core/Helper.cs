@@ -25,6 +25,11 @@ namespace VirusSimulator.Core
             return RandomFloat(0, max);
         }
 
+        public static int RandomInt(int max)
+        {
+            return r.Value.Next(max);
+        }
+
 
     }
 }

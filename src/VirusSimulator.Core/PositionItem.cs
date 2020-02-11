@@ -9,7 +9,6 @@ namespace VirusSimulator.Core
 {
     public struct PositionItem
     {
-        public int ID;
         public Vector2 Position;
         public Matrix3x2 Transform;
 
@@ -21,15 +20,15 @@ namespace VirusSimulator.Core
 
     public static class PositionItemHelper
     {
-        public static void MoveTo(ref this PositionItem person, Vector2 position)
+        public static void Move(ref this PositionItem person, Vector2 v)
         {
-            person.Transform = Matrix3x2.CreateTranslation(position) * person.Transform;
+            person.Transform = Matrix3x2.CreateTranslation(v) * person.Transform;
             person.Position = person.Transform.Translation;
         }
 
-        public static void MoveTo(ref this PositionItem person, float x, float y)
+        public static void Move(ref this PositionItem person, float x, float y)
         {
-            person.MoveTo(new Vector2(x, y));
+            person.Move(new Vector2(x, y));
         }
 
         public static void Rotate(ref this PositionItem person, float radians)
@@ -38,6 +37,11 @@ namespace VirusSimulator.Core
             person.Position = person.Transform.Translation;
         }
 
+        public static void MoveTo(ref this PositionItem person,Vector2 position)
+        {
+            person.Transform = Matrix3x2.CreateTranslation(position);
+            person.Position = person.Transform.Translation;
+        }
         
 
         

@@ -20,10 +20,10 @@ namespace VirusSimulator.Core.QuadTree
 
         private GetPositionDelegate getPosition;
 
-
-        
-        public QuadTreeNode(RectangleF range, GetPositionDelegate getPositionCallback, int Capacity=10)
+        private int level;
+        public QuadTreeNode(RectangleF range, GetPositionDelegate getPositionCallback, int Capacity=10,int MaxLevels=100)
         {
+            level = MaxLevels;
             if (Capacity<=0)
             {
                 throw new ArgumentOutOfRangeException(nameof(Capacity), "Capacity must larger than 0");
@@ -48,7 +48,7 @@ namespace VirusSimulator.Core.QuadTree
             }
             else
             {
-                if (Items.Value.Count==capacity)
+                if (Items.Value.Count==capacity && level>0)
                 {
                     //capacity full, split into new children
                     splitRange();
@@ -74,11 +74,11 @@ namespace VirusSimulator.Core.QuadTree
         private void splitRange()
         {
             Children = new List<QuadTreeNode<T>>(4);
-            
-            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, Range.Top, center.X, center.Y),getPosition, capacity));//top left
-            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, Range.Top, Range.Right, center.Y), getPosition, capacity));//top right
-            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, center.Y, center.X, Range.Bottom), getPosition, capacity));//bottom left
-            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, center.Y, Range.Right, Range.Bottom), getPosition, capacity));//bottom right
+            int newLevel = level - 1;
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, Range.Top, center.X, center.Y),getPosition, capacity, newLevel));//top left
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, Range.Top, Range.Right, center.Y), getPosition, capacity, newLevel));//top right
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(Range.Left, center.Y, center.X, Range.Bottom), getPosition, capacity, newLevel));//bottom left
+            Children.Add(new QuadTreeNode<T>(RectangleF.FromLTRB(center.X, center.Y, Range.Right, Range.Bottom), getPosition, capacity, newLevel));//bottom right
         }
         public bool IsInRange(Vector2 v)
         {
