@@ -29,9 +29,18 @@
                 <TextBox HorizontalAlignment="Left" Margin="1,128,0,0" Text="{Binding MaxSteps, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                 <Label Content="最大迭代次数" HorizontalAlignment="Left" Margin="1,97,0,0" VerticalAlignment="Top"/>
                 <Label Content="{Binding FrameIndex, Mode=OneWay}" HorizontalAlignment="Left" Margin="1,211,0,0" VerticalAlignment="Top" ContentStringFormat="Frame {0}"/>
-                <oxy:Plot Grid.Row="1" InvalidateFlag="{Binding FrameIndex, Mode=OneWay}" >
-                    <oxy:AreaSeries ItemsSource="{Binding HisData, Mode=OneWay}"/>
-                </oxy:Plot>
+                <Grid Margin="0,0,0,0" Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <oxy:Plot InvalidateFlag="{Binding FrameIndex, Mode=OneWay}" Grid.RowSpan="1" >
+                        <oxy:AreaSeries ItemsSource="{Binding HisData, Mode=OneWay}"/>
+                    </oxy:Plot>
+                    <oxy:Plot InvalidateFlag="{Binding FrameIndex, Mode=OneWay}" Grid.RowSpan="1" Grid.Row="1" >
+                        <oxy:AreaSeries ItemsSource="{Binding RecentHisData, Mode=OneWay}"/>
+                    </oxy:Plot>
+                </Grid>
                 <Label Content="最大感染率" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
                 <Slider HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="182" Maximum="100" Value="{Binding MaxInfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" TickFrequency="10" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
             </Grid>
@@ -64,7 +73,9 @@
         <Slider HorizontalAlignment="Left" Margin="566,65,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="30" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
         <TextBlock HorizontalAlignment="Left" Margin="69,40,0,0" Text="FrameSkip" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Margin="129,42,0,0" Text="{Binding FrameSkip}" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
-        <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="10000" Minimum="100" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
+        <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="30000" Minimum="100" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
+        <TextBox HorizontalAlignment="Left" Margin="285,15,0,0" Text="{Binding PointsInitSource, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="197"/>
+        <Label Content="图片初始化" HorizontalAlignment="Left" Margin="215,13,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

@@ -27,6 +27,7 @@ using System.Windows;
 using VirusSimulator.Image;
 using VirusSimulator.Image.WPF;
 using VirusSimulator.Image.Plugins;
+using System.Numerics;
 //using System.Windows.Media;
 
 namespace VirusSimulator.WPF.ViewModel
@@ -56,16 +57,47 @@ namespace VirusSimulator.WPF.ViewModel
         private readonly int defaultFrameSkip = 5;
 
         public List<DataPoint> HisData { get; } = new List<DataPoint>();
+
+        public IEnumerable<DataPoint> RecentHisData {
+            get 
+            {
+                return HisData.TakeLast(100);
+            }
+                }
+
         Runner<TestContext> runner;
 
+        private List<Vector2> startupPoints;
 
         ImageProcessor<TestContext, Bgra32> imageProcessor;
         public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
+
+        private int maxHisSteps = 100;
+        public string PointsInitSource { get; set; }
         public MainViewModel()
         {
-
+            //ImagePositionLoader il = new ImagePositionLoader("d:\\temp\\test1.bmp", MapSize);
+            //il.TestOutput("d:\\temp\\test2.bmp", MapSize, 7000);
+            initStartup();
         }
 
+        private void initStartup()
+        {
+            startupPoints = new List<Vector2>(PersonCount);
+            if (!string.IsNullOrWhiteSpace(PointsInitSource) && File.Exists(PointsInitSource))
+            {
+                ImagePositionLoader ipl = new ImagePositionLoader(PointsInitSource, MapSize);
+                foreach (var item in ipl.GetRandomPoints(PersonCount))
+                {
+                    startupPoints.Add(item);
+                }
+            }
+            //init random
+            for (int i = 0; i < PersonCount; i++)
+            {
+                startupPoints.Add(new Vector2(Helper.RandomFloat(MapSize), Helper.RandomFloat(MapSize)));
+            }
+        }
 
         public void DoTest()
         {
@@ -102,18 +134,22 @@ namespace VirusSimulator.WPF.ViewModel
                 imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
             }
             runner.Processors.Add(new SimpleProcessor<TestContext>(updateUI)
-                .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
+                //.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
                 );
 
 
             runner.OnStep += Runner_OnStep;
 
-            runner.Context.InitRandomPosition();
-            //runner.Context.InitCirclePosition(new System.Numerics.Vector2(runner.Context.Size.Width/2, runner.Context.Size.Height/2), 400);
+            initStartup();
+            runner.Context.Persons.ForAllParallel((int index, ref PositionItem item) =>
+            {
+                item.Position = startupPoints[index];
+            });
             runner.Start(StepGap);
 
         }
 
+        
         private void raisePropertyChanged(params string[] names)
         {
             if (Application.Current.Dispatcher.Thread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId)
@@ -130,9 +166,8 @@ namespace VirusSimulator.WPF.ViewModel
         }
         private void updateUI(TestContext _, TimeSpan __)
         {
-
             HisData.Add(new DataPoint(FrameIndex, Infected));
-            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(Infected), nameof(WorldClock));
+            raisePropertyChanged(nameof(FrameIndex), nameof(HisData),nameof(RecentHisData),  nameof(Infected), nameof(WorldClock));
         }
 
         private void Runner_OnStep(object sender, StepInfo e)
