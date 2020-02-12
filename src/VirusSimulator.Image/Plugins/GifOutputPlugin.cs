@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace VirusSimulator.ImageSharpOutput.Plugins
+namespace VirusSimulator.Image.Plugins
 {
     public class GifOutputPlugin<TPixel> : IImageProcessorPlugIn<TPixel> where TPixel : struct, IPixel<TPixel>
     {

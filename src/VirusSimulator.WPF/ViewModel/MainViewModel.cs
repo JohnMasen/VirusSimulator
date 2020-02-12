@@ -23,10 +23,10 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.IO;
 using SixLabors.Primitives;
-using VirusSimulator.ImageSharpOutput;
-using VirusSimulator.ImageSharpOutput.WPF;
 using System.Windows;
-using VirusSimulator.ImageSharpOutput.Plugins;
+using VirusSimulator.Image;
+using VirusSimulator.Image.WPF;
+using VirusSimulator.Image.Plugins;
 //using System.Windows.Media;
 
 namespace VirusSimulator.WPF.ViewModel
@@ -59,7 +59,7 @@ namespace VirusSimulator.WPF.ViewModel
         Runner<TestContext> runner;
 
 
-        ImageSharpProcessor<TestContext, Bgra32> imageProcessor;
+        ImageProcessor<TestContext, Bgra32> imageProcessor;
         public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
         public MainViewModel()
         {
@@ -89,7 +89,7 @@ namespace VirusSimulator.WPF.ViewModel
             //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
             //runner.Processors.Add(r);
 
-            imageProcessor = new ImageSharpProcessor<TestContext, Bgra32>(renderImageResult);
+            imageProcessor = new ImageProcessor<TestContext, Bgra32>(renderImageResult);
             runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
 
             var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);

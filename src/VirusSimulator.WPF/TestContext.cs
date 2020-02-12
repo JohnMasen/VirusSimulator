@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using VirusSimulator.Core;
-using VirusSimulator.ImageSharpOutput;
+using VirusSimulator.Image;
 using VirusSimulator.Processor;
 using VirusSimulator.Processor.Test;
 

@@ -8,14 +8,14 @@ using System.Diagnostics.CodeAnalysis;
 using VirusSimulator.Core;
 using VirusSimulator.Core.Processors;
 
-namespace VirusSimulator.ImageSharpOutput
+namespace VirusSimulator.Image
 {
-    public class ImageSharpProcessor<TContext,TPixel>: ProcessorBase<TContext> where TPixel : struct, IPixel<TPixel> where TContext :RunContext
+    public class ImageProcessor<TContext,TPixel>: ProcessorBase<TContext> where TPixel : struct, IPixel<TPixel> where TContext :RunContext
     {
         public List<IImageProcessorPlugIn<TPixel>> Plugins { get; } = new List<IImageProcessorPlugIn<TPixel>>();
         public Image<TPixel> Image { get; private set; }
         private Action<IImageProcessingContext, TContext> draw;
-        public ImageSharpProcessor(Action<IImageProcessingContext, TContext> renderCallback)
+        public ImageProcessor(Action<IImageProcessingContext, TContext> renderCallback)
         {
             draw = renderCallback??throw new ArgumentNullException(nameof(renderCallback));
         }

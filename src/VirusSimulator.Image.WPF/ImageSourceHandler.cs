@@ -13,7 +13,7 @@ using System.Windows.Threading;
 using VirusSimulator.Core;
 using VirusSimulator.Core.Decorators;
 
-namespace VirusSimulator.ImageSharpOutput.WPF
+namespace VirusSimulator.Image.WPF
 {
     public class ImageSourceHandler<TPixel> :IImageProcessorPlugIn<TPixel> where TPixel:struct,IPixel<TPixel>
     {

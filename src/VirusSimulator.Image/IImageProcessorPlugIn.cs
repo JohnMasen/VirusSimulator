@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace VirusSimulator.ImageSharpOutput
+namespace VirusSimulator.Image
 {
     public interface IImageProcessorPlugIn<TPixel> where TPixel:struct,IPixel<TPixel>
     {
