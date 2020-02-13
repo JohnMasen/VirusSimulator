@@ -12,7 +12,7 @@ namespace VirusSimulator.Core.QuadTree
     {
         public readonly RectangleF Range;
         public Lazy<List<T>> Items=new Lazy<List<T>>();
-        private int capacity;
+        private readonly int capacity;
         private Vector2 center;
         public List<QuadTreeNode<T>> Children;
 
@@ -85,6 +85,12 @@ namespace VirusSimulator.Core.QuadTree
             return Range.Contains(v.X, v.Y);
         }
 
+        public void Clear()
+        {
+            Items = new Lazy<List<T>>();
+            Children = null;
+        }
+
         public bool IsIntersectWithCircle(Vector2 circleCenter,float radius)
         {
             return IsIntersectWithCircleInternal(circleCenter, radius * radius);
@@ -102,7 +108,7 @@ namespace VirusSimulator.Core.QuadTree
             return Vector2.Dot(e, e) <= radiusSqr;//use dot instead of lengthsquart to prevent boxing
         }
 
-        public IEnumerable<T> GetItemInDistance(Vector2 position,float distance)
+        public IEnumerable<T> GetItemsInDistance(Vector2 position,float distance)
         {
             return GetItemInDistanceInternal(position,distance * distance);
         }

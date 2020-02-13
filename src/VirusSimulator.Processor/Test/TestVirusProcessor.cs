@@ -32,7 +32,7 @@ namespace VirusSimulator.Processor.Test
         public override void Process(T context, TimeSpan span)
         {
             _ = context ?? throw new ArgumentNullException(nameof(context));
-            indexer = PositionItem.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
+            indexer.Clear();
             for (int i = 0; i < context.VirusData.Items.Span.Length; i++)
             {
                 var item = context.VirusData.Items.Span[i];
@@ -47,31 +47,17 @@ namespace VirusSimulator.Processor.Test
              {
                  if (data.IsInfected == InfectionData.NotInfected)
                  {
-                     var items = indexer.GetItemInDistance(p.Position, InfectionRadius);
-                     bool result;
-                     if (items!=null)
+                     int count = indexer.GetItemsCountInDistance(p.Position, InfectionRadius);
+                     if (count>0 && Helper.RandomFloat(1) <= 1 - (Math.Pow((1 - InfectionRate), count)))
                      {
-                         result = Helper.RandomFloat(1)<= 1- (Math.Pow((1-InfectionRate), items.Count()));
+                         data.IsInfected = InfectionData.Infected;
                      }
                      else
                      {
-                         result = false;
+                         data.IsInfected = InfectionData.NotInfected;
                      }
-                     //bool result = indexer.GetItemInDistance(p.Position, InfectionRadius)?.Sum()>0;
-                     data.IsInfectedNext = (result == true) ? InfectionData.Infected : InfectionData.NotInfected;
                  }
              });
-            //commit infection
-            context.VirusData.ForAllParallel((ref InfectionData data) =>
-            {
-                if (data.IsInfectedNext == InfectionData.Infected)
-                {
-                    data.IsInfected = InfectionData.Infected;
-                }
-                data.IsInfected = data.IsInfectedNext;
-            });
-
-            //context.VirusData.ForAll()
         }
         public override void Init(T context)
         {
@@ -80,6 +66,7 @@ namespace VirusSimulator.Processor.Test
                 inf.IsInfected = index < infected ? InfectionData.Infected : InfectionData.NotInfected;
                 inf.IsInfectedNext = inf.IsInfected;
             });
+            indexer = PositionItem.CreatePersonQuadTree(RectangleF.FromLTRB(0, 0, context.Size.Width, context.Size.Width));
         }
 
 
