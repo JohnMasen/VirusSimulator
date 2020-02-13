@@ -76,6 +76,12 @@ namespace VirusSimulator.WPF.ViewModel
 
         private int maxHisSteps = 100;
         public string PointsInitSource { get; set; }
+
+        public string RunStatus { get; private set; }
+
+        private Stopwatch sw = new Stopwatch();
+
+        private long fps;
         public MainViewModel()
         {
             //ImagePositionLoader il = new ImagePositionLoader("d:\\temp\\test1.bmp", MapSize);
@@ -101,6 +107,11 @@ namespace VirusSimulator.WPF.ViewModel
             }
         }
 
+        private void updateStatus(string value)
+        {
+            RunStatus = value;
+            raisePropertyChanged(nameof(RunStatus));
+        }
         public void DoTest()
         {
             //doStep();
@@ -159,6 +170,8 @@ namespace VirusSimulator.WPF.ViewModel
             {
                 item.Position = startupPoints[index];
             });
+            sw.Reset();
+            sw.Start();
             runner.Start(StepGap);
 
         }
@@ -180,6 +193,14 @@ namespace VirusSimulator.WPF.ViewModel
         }
         private void updateUI(TestContext _, TimeSpan __)
         {
+            long duration = (long)sw.Elapsed.TotalSeconds;
+            if (duration==0)
+            {
+                return;
+            }
+            
+            fps = FrameIndex / (long)sw.Elapsed.TotalSeconds;
+            updateStatus($"Running {sw.Elapsed} fps={fps}");
             HisData.Add(new DataPoint(FrameIndex, Infected));
             raisePropertyChanged(nameof(FrameIndex), nameof(HisData),nameof(RecentHisData),  nameof(Infected), nameof(WorldClock));
         }
@@ -190,6 +211,8 @@ namespace VirusSimulator.WPF.ViewModel
             {
                 e.IsCancel = true;
                 runner = null;
+                sw.Stop();
+                updateStatus($"Stopped Duration={sw.Elapsed} fps={fps}");
             }
             FrameIndex = e.FrameIndex;
 
@@ -199,7 +222,8 @@ namespace VirusSimulator.WPF.ViewModel
         {
             runner?.Stop();
             runner = null;
-
+            sw.Stop();
+            updateStatus($"Stopped Duration={sw.Elapsed} fps={fps}");
         }
         private void renderImageResult(IImageProcessingContext img, TestContext context)
         {

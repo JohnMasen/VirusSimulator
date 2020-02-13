@@ -12,6 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="33*"/>
             <RowDefinition Height="184*"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="1" >
             <Grid.ColumnDefinitions>
@@ -77,6 +78,7 @@
         <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="30000" Minimum="100" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
         <TextBox HorizontalAlignment="Left" Margin="285,15,0,0" Text="{Binding PointsInitSource, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="197"/>
         <Label Content="图片初始化" HorizontalAlignment="Left" Margin="215,13,0,0" VerticalAlignment="Top"/>
+        <TextBlock Grid.Row="3" VerticalAlignment="Bottom" Height="20" Text="{Binding RunStatus, Mode=OneWay}"/>
 
     </Grid>
 </Window>
