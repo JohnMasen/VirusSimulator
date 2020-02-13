@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Test\IVirusContext.cs" />
+    <Compile Remove="Test\TestVirusProcessor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
   </ItemGroup>
 

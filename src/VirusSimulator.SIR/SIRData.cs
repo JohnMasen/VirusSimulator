@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using VirusSimulator.Core;
 
 namespace VirusSimulator.SIR
@@ -14,7 +15,7 @@ namespace VirusSimulator.SIR
         public float InfectionRate { get; set; }
 
         public TimeSpan GroundCountdown { get; set; }
-        public TimeSpan CureCountdown { get; set; }
+        //public TimeSpan CureCountdown { get; set; }
 
         #region Consts
         public const byte CleanupFlags = 0b_11111_000;
@@ -46,11 +47,24 @@ namespace VirusSimulator.SIR
         /// 更新掩码-被隔离，（已传染，无法被传染，无法传染他人）
         /// </summary>
         public const byte Person_Grounded = Infected;
-        
+        #endregion
     }
 
     public interface ISIRContext
     {
         public DataBuffer<SIRData> SIRInfo { get;  }
+
+        public int GetInfectedCount()
+        {
+            int result = 0;
+            SIRInfo.ForAllParallel((ref SIRData data) =>
+            {
+                if ((data.Status & SIRData.Infected)>0)
+                {
+                    Interlocked.Increment(ref result);
+                }
+            });
+            return result;
+        }
     }
 }

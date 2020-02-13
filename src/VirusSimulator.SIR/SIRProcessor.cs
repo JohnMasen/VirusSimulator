@@ -47,12 +47,12 @@ namespace VirusSimulator.SIR
                      infectedItems.AddItem(pos);
                  }
              });
-            
+
             //try to be infected
             ProcessInfection(context, span);
 
             //update ground info
-            ProcessGround(context, groundDuration);
+            ProcessGround(context, span);
 
             ProcessCure(context, groundDuration);
         }
@@ -65,15 +65,19 @@ namespace VirusSimulator.SIR
                 if ((sir.Status & SIRData.CanInfect) > 0)
                 {
                     var InfectivesCount = infectedItems.GetItemsCountInDistance(pos.Position, InfectionRadias);
-                    if (InfectivesCount>0)
+                    if (InfectivesCount > 0)
                     {
                         sir.InfectionRate += InfectivesCount * InfectionRate * rate;
                         if (sir.InfectionRate >= 1f)
                         {
-                            sir.Status =SIRData.Person_Infective;
+                            sir.Status = SIRData.Person_Infective;
                             sir.InfectionRate = 0;
                             sir.GroundCountdown = GroundDelay;
                         }
+                    }
+                    else
+                    {
+                        sir.InfectionRate = 0f;
                     }
                 }
             });
@@ -89,10 +93,12 @@ namespace VirusSimulator.SIR
                 int personsToGround = hours * GroundPerHour;
                 context.SIRInfo.ForAllParallel((ref SIRData item) =>
                 {
-                    if ((item.Status & SIRData.Person_Infective) >0) 
+                    if ((item.Status & SIRData.Person_Infective) > 0)
                     {
-                        if (item.GroundCountdown< span) //time's up, this guy should be grounded
+                        if (item.GroundCountdown <= span) //time's up, this guy should be grounded
                         {
+                            item.GroundCountdown = TimeSpan.Zero;//clear ground countdown
+
                             if (Interlocked.Decrement(ref personsToGround) >= 0) //ground capcity is not full, do isolation
                             {
                                 item.Status = SIRData.Person_Grounded;
@@ -102,7 +108,7 @@ namespace VirusSimulator.SIR
                         {
                             item.GroundCountdown -= span;
                         }
-                        
+
                     }
                 });
             }
@@ -123,7 +129,7 @@ namespace VirusSimulator.SIR
             groundDuration = TimeSpan.Zero;
             context.SIRInfo.ForAllParallel((int idx, ref SIRData data) =>
             {
-                if (idx<initWithInfected)
+                if (idx < initWithInfected)
                 {
                     data.Status = SIRData.Person_Infective;
                     data.GroundCountdown = GroundDelay;

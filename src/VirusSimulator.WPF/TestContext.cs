@@ -10,19 +10,25 @@ using VirusSimulator.Core;
 using VirusSimulator.Image;
 using VirusSimulator.Processor;
 using VirusSimulator.Processor.Test;
+using VirusSimulator.SIR;
 
 namespace VirusSimulator.WPF
 {
-    public class TestContext : RunContext, IVirusContext, IPersonMoveContext
+    public class TestContext : RunContext,ISIRContext, IPersonMoveContext
     {
-        DataBuffer<InfectionData> IVirusContext.VirusData { get; set; }
         DataBuffer<MoveStatus> IPersonMoveContext.MoveStatus { get; set; }
         public Image<Bgra32> Image { get; set; }
+
+        public DataBuffer<SIRData> SIRInfo { get; private set; }
 
         protected override void Init()
         {
             base.Init();
-            (this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
+            //(this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
+            SIRInfo = new DataBuffer<SIRData>(Persons.Items.Length, 0, _ =>
+            {
+                return new SIRData() { Status = SIRData.Person_Susceptible };
+            });
             (this as IPersonMoveContext).MoveStatus = new DataBuffer<MoveStatus>(Persons.Items.Length, Persons.Bins, (index) =>
             {
                 return new MoveStatus() { ID = index, CurrentTarget = Vector2.Zero, IsMovingToTarget = MovingStatusEnum.Idle };
