@@ -56,12 +56,14 @@ namespace VirusSimulator.WPF.ViewModel
 
         private readonly int defaultFrameSkip = 5;
 
+        public bool? EnableRealtimeOutput { get; set; } = true;
+
         public List<DataPoint> HisData { get; } = new List<DataPoint>();
 
         public IEnumerable<DataPoint> RecentHisData {
             get 
             {
-                return HisData.TakeLast(100);
+                return HisData.TakeLast(maxHisSteps);
             }
                 }
 
@@ -121,21 +123,33 @@ namespace VirusSimulator.WPF.ViewModel
             //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
             //runner.Processors.Add(r);
 
-            imageProcessor = new ImageProcessor<TestContext, Bgra32>(renderImageResult);
-            runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
-
-            var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
-            ImageSource = s.ImageSource;
-            imageProcessor.Plugins.Add(s);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
-
-            if (EnableGIFOutput == true)
+            
+            
+            if (EnableRealtimeOutput==true || EnableGIFOutput==true)
             {
-                imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                imageProcessor = new ImageProcessor<TestContext, Bgra32>(renderImageResult);
+                runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
+                var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
+
+                if (EnableRealtimeOutput==true)
+                {
+                    ImageSource = s.ImageSource;
+                    imageProcessor.Plugins.Add(s);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
+                }
+                if (EnableGIFOutput == true)
+                {
+                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                }
+                
+
             }
             runner.Processors.Add(new SimpleProcessor<TestContext>(updateUI)
-                //.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
-                );
+                    .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
+                    );
+
+
+
 
 
             runner.OnStep += Runner_OnStep;
