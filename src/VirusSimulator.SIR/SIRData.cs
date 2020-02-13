@@ -14,43 +14,39 @@ namespace VirusSimulator.SIR
         public float InfectionRate { get; set; }
 
         public TimeSpan GroundCountdown { get; set; }
+        public TimeSpan CureCountdown { get; set; }
 
         #region Consts
+        public const byte CleanupFlags = 0b_11111_000;
+        /// <summary>
+        /// 已经被感染
+        /// </summary>
         public const byte Infected = 0b_001;
         /// <summary>
-        /// 是否可以被感染
+        /// 可以被感染
         /// </summary>
         public const byte CanInfect = 0b_010;
         /// <summary>
-        /// 是否可以感染他人
+        /// 可以感染他人
         /// </summary>
         public const byte CanInfectOthers = 0b_100;
         /// <summary>
-        /// 更新掩码-易感人群（未感染，可以被传染）
+        /// 更新掩码-易感人群（未感染，可以被传染，无法传染他人）
         /// </summary>
-        public const byte Make_Susceptible = 0b_11111_010;
+        public const byte Person_Susceptible = CanInfect;
         /// <summary>
-        /// 更新掩码-传染者（已感染，可以传染）
+        /// 更新掩码-传染者（已感染，无法被传染， 可以传染他人）
         /// </summary>
-        public const byte Make_Infectives = 0b_11111_101;
+        public const byte Person_Infective = Infected|CanInfectOthers;
         /// <summary>
-        /// 更新掩码-恢复者（未感染，免疫感染）
+        /// 更新掩码-恢复者（未感染，无法被传染，无法传染他人）
         /// </summary>
-        public const byte Make_Recovered = 0b_11111_000;
+        public const byte Person_Recovered = 0;
         /// <summary>
-        /// 更新掩码-被隔离，（已传染，无法传染他人）
+        /// 更新掩码-被隔离，（已传染，无法被传染，无法传染他人）
         /// </summary>
-        public const byte Make_Grounded = 0b_11111_001;
-        /// <summary>
-        /// 传染者（已感染，可以传染）
-        /// </summary>
-        public const byte InfectedNotGrounded = Infected | CanInfectOthers;
-        /// <summary>
-        /// 被隔离，（已传染，无法传染他人）
-        /// </summary>
-        public const byte InfectedGrounded = Infected;
-        #endregion
-
+        public const byte Person_Grounded = Infected;
+        
     }
 
     public interface ISIRContext
