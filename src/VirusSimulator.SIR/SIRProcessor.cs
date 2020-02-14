@@ -35,7 +35,7 @@ namespace VirusSimulator.SIR
         QuadTreeNode<PositionItem> infectedItems;
         public override void Process(T context, TimeSpan span)
         {
-            var x1 = (context as ISIRContext).GetCount();
+            //var x1 = (context as ISIRContext).GetCount();
             infectedItems.Clear();
             //refresh infected person indexer
             context.SIRInfo.ForAllWtihReference(context.Persons, (ref SIRData sir, ref PositionItem pos) =>
@@ -48,12 +48,12 @@ namespace VirusSimulator.SIR
 
             //try to be infected
             ProcessInfection(context, span);
-            var x2 = (context as ISIRContext).GetCount();
+            //var x2 = (context as ISIRContext).GetCount();
             //update ground info
             ProcessGround(context, span);
-            var x3 = (context as ISIRContext).GetCount();
+            //var x3 = (context as ISIRContext).GetCount();
             ProcessCure(context, span);
-            var x4 = (context as ISIRContext).GetCount();
+            //var x4 = (context as ISIRContext).GetCount();
         }
 
         protected virtual void ProcessInfection(T context, TimeSpan span)
@@ -87,16 +87,18 @@ namespace VirusSimulator.SIR
             int newPoolSize = groundPoolRemain;
             context.SIRInfo.ForAllParallel((ref SIRData item) =>
             {
-                if (item.Status==SIRData.Infective && newPoolSize > 0)
+                if (item.Status==SIRData.Infective)
                 {
                     if (item.GroundCountdown <= span) //time's up, this guy should be grounded
                     {
                         item.GroundCountdown = TimeSpan.Zero;//clear ground countdown
-
-                        if (Interlocked.Decrement(ref newPoolSize) >= 0) //ground capcity is not full, do isolation
+                        if (newPoolSize>0)
                         {
-                            item.Status = SIRData.Grounded;
-                            item.CureCountdown = CureDelay;
+                            if (Interlocked.Decrement(ref newPoolSize) >= 0) //ground capcity is not full, do isolation
+                            {
+                                item.Status = SIRData.Grounded;
+                                item.CureCountdown = CureDelay;
+                            }
                         }
                     }
                     else

@@ -48,7 +48,7 @@ namespace VirusSimulator.WPF.ViewModel
 
         public int POICount { get; set; } = 10;
 
-        public int InfectedInit { get; set; } = 3;
+        public int InfectedInit { get; set; } = 10;
         public float InfectionRate { get; set; } = 0.4f;
         public float InfectionRadius { get; set; } = 3f;
         public long FrameIndex { get; private set; }
@@ -58,6 +58,7 @@ namespace VirusSimulator.WPF.ViewModel
         private readonly int defaultFrameSkip = 5;
 
         public bool? EnableRealtimeOutput { get; set; } = true;
+        public int? GroundPoolSize { get; set; } = 200;
 
         public List<DataPoint> HisData { get; } = new List<DataPoint>();
 
@@ -134,7 +135,7 @@ namespace VirusSimulator.WPF.ViewModel
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
             runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6,PersonActivity));
             //runner.Processors.Add(new TestVirusProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadias, InfectionRate = InfectionRate });
-            runner.Processors.Add(new SIRProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadius, InfectionRate = InfectionRate });
+            runner.Processors.Add(new SIRProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadius, InfectionRate = InfectionRate,GroundPoolSize=GroundPoolSize.Value });
             //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
             //runner.Processors.Add(r);
 

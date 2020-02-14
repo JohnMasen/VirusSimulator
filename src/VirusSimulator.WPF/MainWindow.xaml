@@ -77,7 +77,7 @@
         <Slider HorizontalAlignment="Left" Margin="566,15,0,0" VerticalAlignment="Top" Width="120" SmallChange="0.01" Maximum="1" LargeChange="0.1" Value="{Binding InfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
         <Label Content="感染概率" HorizontalAlignment="Left" Margin="508,13,0,0" VerticalAlignment="Top"/>
         <Label Content="感染半径" HorizontalAlignment="Left" Margin="508,34,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,38,0,0" VerticalAlignment="Top" Width="120" Value="{Binding InfectionRadias, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
+        <Slider HorizontalAlignment="Left" Margin="566,38,0,0" VerticalAlignment="Top" Width="120" Value="{Binding InfectionRadius}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
         <Label Content="POI数" HorizontalAlignment="Left" Margin="508,55,0,0" VerticalAlignment="Top"/>
         <Slider HorizontalAlignment="Left" Margin="566,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="30" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
         <TextBlock HorizontalAlignment="Left" Margin="69,40,0,0" Text="FrameSkip" TextWrapping="Wrap" VerticalAlignment="Top"/>
@@ -88,6 +88,8 @@
         <TextBlock Grid.Row="3" VerticalAlignment="Bottom" Height="20" Text="{Binding RunStatus, Mode=OneWay}"/>
         <Label Content="人员活跃度" HorizontalAlignment="Left" Margin="508,76,0,0" VerticalAlignment="Top"/>
         <Slider HorizontalAlignment="Left" Margin="566,81,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1" LargeChange="5" Value="{Binding PersonActivity}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="0.01"/>
+        <TextBlock HorizontalAlignment="Left" Margin="348,67,0,0" Text="床位数" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Margin="348,84,0,0" VerticalAlignment="Top" Width="120" Value="{Binding GroundPoolSize, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="500" AutoToolTipPlacement="TopLeft"/>
 
     </Grid>
 </Window>
