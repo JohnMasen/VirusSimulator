@@ -49,10 +49,10 @@ namespace VirusSimulator.WPF.ViewModel
         public int POICount { get; set; } = 10;
 
         public int InfectedInit { get; set; } = 3;
-        public float InfectionRate { get; set; } = 0.2f;
-        public float InfectionRadias { get; set; } = 2f;
+        public float InfectionRate { get; set; } = 0.4f;
+        public float InfectionRadius { get; set; } = 3f;
         public long FrameIndex { get; private set; }
-
+        public float PersonActivity { get; set; } = 0.1f;
         public int? MaxInfectionRate { get; set; } = 80;
 
         private readonly int defaultFrameSkip = 5;
@@ -60,6 +60,8 @@ namespace VirusSimulator.WPF.ViewModel
         public bool? EnableRealtimeOutput { get; set; } = true;
 
         public List<DataPoint> HisData { get; } = new List<DataPoint>();
+
+        public List<ColumnItem> SIRRunningTotal { get; } = new List<ColumnItem>();
 
         public IEnumerable<DataPoint> RecentHisData
         {
@@ -130,9 +132,9 @@ namespace VirusSimulator.WPF.ViewModel
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6));
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6,PersonActivity));
             //runner.Processors.Add(new TestVirusProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadias, InfectionRate = InfectionRate });
-            runner.Processors.Add(new SIRProcessor<TestContext>(InfectedInit) { InfectionRadias = InfectionRadias, InfectionRate = InfectionRate });
+            runner.Processors.Add(new SIRProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadius, InfectionRate = InfectionRate });
             //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
             //runner.Processors.Add(r);
 
@@ -202,15 +204,24 @@ namespace VirusSimulator.WPF.ViewModel
                 return;
             }
 
+            SIRRunningTotal.Clear();
+            SIRRunningTotal.Add(new ColumnItem(Statistics.Infective));
+            SIRRunningTotal.Add(new ColumnItem(Statistics.Grounded));
+
             fps = FrameIndex / (long)sw.Elapsed.TotalSeconds;
             updateStatus($"Running {sw.Elapsed} fps={fps}");
-            HisData.Add(new DataPoint(FrameIndex, Infected));
-            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(RecentHisData), nameof(Infected), nameof(WorldClock));
+            HisData.Add(new DataPoint(FrameIndex, Statistics.Infective));
+            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(RecentHisData), nameof(Statistics), nameof(WorldClock),nameof(SIRRunningTotal));
         }
 
         private void Runner_OnStep(object sender, StepInfo e)
         {
-            int infectedCount = Infected;
+            refreshStatistics();
+
+            
+
+
+            int infectedCount = Statistics.Infective;
             if (e.FrameIndex >= MaxSteps 
                 || (MaxInfectionRate.HasValue && infectedCount * 100 / PersonCount >= MaxInfectionRate
                 || infectedCount == 0))
@@ -263,21 +274,18 @@ namespace VirusSimulator.WPF.ViewModel
         }
 
 
-
-
-
-        public int Infected
+        private void refreshStatistics()
         {
-            get
+            if (runner==null)
             {
-                if (runner == null)
-                {
-                    return 0;
-                }
-                var x = (runner.Context as ISIRContext).GetCount();
-                return x.Infective;
+                return;
             }
+            Statistics = (runner.Context as ISIRContext).GetCount();
         }
+
+
+        public SIRDataStatistics Statistics { get; private set; } = SIRDataStatistics.ZERO;
+        public string[] ColumnCategories { get; } = new string[2] { nameof(SIRData.Infective), nameof(SIRData.Grounded) };
 
         public DateTime WorldClock
         {

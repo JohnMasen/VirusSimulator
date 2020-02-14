@@ -14,7 +14,7 @@ namespace VirusSimulator.SIR
 {
     public class SIRProcessor<T> : ProcessorBase<T> where T : RunContext, ISIRContext
     {
-        public float InfectionRadias { get; set; } = 2f;
+        public float InfectionRadius { get; set; } = 2f;
 
         public float InfectionRate { get; set; } = 0.1f;
 
@@ -63,7 +63,7 @@ namespace VirusSimulator.SIR
             {
                 if (sir.Status ==SIRData.Susceptible)
                 {
-                    var InfectivesCount = infectedItems.GetItemsCountInDistance(pos.Position, InfectionRadias);
+                    var InfectivesCount = infectedItems.GetItemsCountInDistance(pos.Position, InfectionRadius);
                     if (InfectivesCount > 0)
                     {
                         sir.InfectionProgress += InfectivesCount * rate;

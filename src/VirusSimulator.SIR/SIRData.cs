@@ -50,43 +50,54 @@ namespace VirusSimulator.SIR
         #endregion
     }
 
+    public class SIRDataStatistics
+    {
+        public int Susceptible { get; set; }
+        public int Infective { get; set; }
+
+        public int Grounded { get; set; }
+
+        public int Recovered { get; set; }
+        public static SIRDataStatistics ZERO = new SIRDataStatistics();
+    }
+
     public interface ISIRContext
     {
         public DataBuffer<SIRData> SIRInfo { get; }
 
 
-        public (int Susceptible, int Infective, int Grounded, int Recovered) GetCount()
+        public SIRDataStatistics GetCount()
         {
-            int Susceptible = 0;
-            int Infective = 0;
-            int Grounded = 0;
-            int Recovered = 0;
+            int susceptible = 0;
+            int infective = 0;
+            int grounded = 0;
+            int recovered = 0;
             SIRInfo.ForAllParallel((int idx,ref SIRData item) =>
             {
                 if ((item.Status & SIRData.Susceptible) ==SIRData.Susceptible)
                 {
-                    Interlocked.Increment(ref Susceptible);
+                    Interlocked.Increment(ref susceptible);
                     return;
                 }
                 if ((item.Status & SIRData.Infective)==SIRData.Infective)
                 {
-                    Interlocked.Increment(ref Infective);
+                    Interlocked.Increment(ref infective);
                     return;
                 }
                 if ((item.Status & SIRData.Grounded)==SIRData.Grounded)
                 {
-                    Interlocked.Increment(ref Grounded);
+                    Interlocked.Increment(ref grounded);
                     return;
                 }
                 if ((item.Status & SIRData.Recovered)==SIRData.Recovered)
                 {
-                    Interlocked.Increment(ref Recovered);
+                    Interlocked.Increment(ref recovered);
                     return;
                 }
                 Debug.WriteLine($"idx={idx},value= {item.Status}");
                 throw new InvalidOperationException();
             });
-            return (Susceptible, Infective, Grounded, Recovered);
+            return new SIRDataStatistics() { Susceptible = susceptible, Infective = infective, Grounded = grounded, Recovered = recovered };
         }
     }
 }

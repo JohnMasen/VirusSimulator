@@ -44,13 +44,13 @@ namespace VirusSimulator.WPF
             });
         }
 
-        public void InitCirclePosition(Vector2 center, float radias)
+        public void InitCirclePosition(Vector2 center, float radius)
         {
             Persons.ForAllParallel((int index, ref PositionItem p) =>
             {
                 p.MoveTo(center);
                 p.Rotate(Helper.RandomFloat(Helper.TwoPI));
-                p.Move(0, Helper.RandomFloat(radias));
+                p.Move(0, Helper.RandomFloat(radius));
             });
         }
 
