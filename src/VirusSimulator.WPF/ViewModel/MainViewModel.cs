@@ -174,6 +174,7 @@ namespace VirusSimulator.WPF.ViewModel
             });
             sw.Reset();
             sw.Start();
+            
             runner.Start(StepGap);
 
         }
@@ -209,7 +210,10 @@ namespace VirusSimulator.WPF.ViewModel
 
         private void Runner_OnStep(object sender, StepInfo e)
         {
-            if (e.FrameIndex >= MaxSteps || (MaxInfectionRate.HasValue && Infected * 100 / PersonCount >= MaxInfectionRate))
+            int infectedCount = Infected;
+            if (e.FrameIndex >= MaxSteps 
+                || (MaxInfectionRate.HasValue && infectedCount * 100 / PersonCount >= MaxInfectionRate
+                || infectedCount == 0))
             {
                 e.IsCancel = true;
                 runner = null;
@@ -230,13 +234,13 @@ namespace VirusSimulator.WPF.ViewModel
         private void renderImageResult(IImageProcessingContext img, TestContext context)
         {
             img.Fill(Color.Black);
-            byte mask = SIRData.CanInfect | SIRData.CanInfectOthers;
+            //byte mask = SIRData.CanInfect | SIRData.CanInfectOthers;
             context.Persons.ForAllParallelWtihReference(context.SIRInfo, (ref PositionItem p, ref SIRData infection) =>
             {
-                if ((infection.Status & mask) > 0)//can infect others or can be infected
+                if (infection.Status ==SIRData.Susceptible || infection.Status==SIRData.Infective)//can infect others or can be infected
                 {
                     Color c;
-                    if ((infection.Status&SIRData.CanInfect)>0)
+                    if (infection.Status ==SIRData.Susceptible)
                     {
                         c = Color.Green;
                     }
@@ -270,7 +274,8 @@ namespace VirusSimulator.WPF.ViewModel
                 {
                     return 0;
                 }
-                return (runner.Context as ISIRContext).GetInfectedCount();
+                var x = (runner.Context as ISIRContext).GetCount();
+                return x.Infective;
             }
         }
 

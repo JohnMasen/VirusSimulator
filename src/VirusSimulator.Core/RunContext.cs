@@ -21,6 +21,9 @@ namespace VirusSimulator.Core
 
         }
 
+        public virtual void StepStart() { }
+        public virtual void StepEnd() { }
+
         public static T CreateInstance<T>(int personCount, DateTime clock, SizeF size, int bins = 10) where T:RunContext,new()
         {
             T result = new T();

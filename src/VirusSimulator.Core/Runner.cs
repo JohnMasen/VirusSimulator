@@ -77,6 +77,7 @@ namespace VirusSimulator.Core
                 isFirstRun = false;
             }
             Context.WorldClock += span;
+            Context.StepStart();
             foreach (var item in Processors)
             {
                 if (item.EnableProcess)
@@ -84,6 +85,7 @@ namespace VirusSimulator.Core
                     item.Process(Context, span);
                 }
             }
+            Context.StepEnd();
         }
 
         

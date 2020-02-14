@@ -20,14 +20,12 @@ namespace VirusSimulator.SIR
 
         public TimeSpan GroundDelay { get; set; } = TimeSpan.FromDays(7);
 
-        //public TimeSpan CureDelay { get; set; } = TimeSpan.FromDays(7);
+        public TimeSpan CureDelay { get; set; } = TimeSpan.FromDays(7);
 
-        /// <summary>
-        /// 每小时可以隔离的人数
-        /// </summary>
-        public int GroundPerHour { get; set; } = 10;
+        public int GroundPoolSize { get; set; } = 200;
 
         private int initWithInfected;
+        private int groundPoolRemain;
         public SIRProcessor(int initInfected)
         {
             initWithInfected = initInfected;
@@ -35,14 +33,14 @@ namespace VirusSimulator.SIR
 
         public TimeSpan InfectionCalculationRate { get; set; } = TimeSpan.FromHours(1);
         QuadTreeNode<PositionItem> infectedItems;
-        TimeSpan groundDuration;
         public override void Process(T context, TimeSpan span)
         {
+            var x1 = (context as ISIRContext).GetCount();
             infectedItems.Clear();
             //refresh infected person indexer
             context.SIRInfo.ForAllWtihReference(context.Persons, (ref SIRData sir, ref PositionItem pos) =>
              {
-                 if ((sir.Status & SIRData.CanInfectOthers) > 0)
+                 if (sir.Status == SIRData.Infective)
                  {
                      infectedItems.AddItem(pos);
                  }
@@ -50,34 +48,35 @@ namespace VirusSimulator.SIR
 
             //try to be infected
             ProcessInfection(context, span);
-
+            var x2 = (context as ISIRContext).GetCount();
             //update ground info
             ProcessGround(context, span);
-
-            ProcessCure(context, groundDuration);
+            var x3 = (context as ISIRContext).GetCount();
+            ProcessCure(context, span);
+            var x4 = (context as ISIRContext).GetCount();
         }
 
         protected virtual void ProcessInfection(T context, TimeSpan span)
         {
-            float rate = (float)(span / InfectionCalculationRate);
+            float rate = (float)(span / InfectionCalculationRate)*InfectionRate;
             context.SIRInfo.ForAllParallelWtihReference(context.Persons, (ref SIRData sir, ref PositionItem pos) =>
             {
-                if ((sir.Status & SIRData.CanInfect) > 0)
+                if (sir.Status ==SIRData.Susceptible)
                 {
                     var InfectivesCount = infectedItems.GetItemsCountInDistance(pos.Position, InfectionRadias);
                     if (InfectivesCount > 0)
                     {
-                        sir.InfectionRate += InfectivesCount * InfectionRate * rate;
-                        if (sir.InfectionRate >= 1f)
+                        sir.InfectionProgress += InfectivesCount * rate;
+                        if (sir.InfectionProgress >= 1f)
                         {
-                            sir.Status = SIRData.Person_Infective;
-                            sir.InfectionRate = 0;
+                            sir.Status = SIRData.Infective;
+                            sir.InfectionProgress = 0;
                             sir.GroundCountdown = GroundDelay;
                         }
                     }
                     else
                     {
-                        sir.InfectionRate = 0f;
+                        sir.InfectionProgress = 0f;
                     }
                 }
             });
@@ -85,56 +84,67 @@ namespace VirusSimulator.SIR
 
         protected virtual void ProcessGround(T context, TimeSpan span)
         {
-            groundDuration += span;
-            int hours = (int)(groundDuration / TimeSpan.FromHours(1));
-            if (hours > 0)// at least 1 hour has passed since last groud operation
+            int newPoolSize = groundPoolRemain;
+            context.SIRInfo.ForAllParallel((ref SIRData item) =>
             {
-                groundDuration -= TimeSpan.FromHours(hours); //decrease the counter
-                int personsToGround = hours * GroundPerHour;
-                context.SIRInfo.ForAllParallel((ref SIRData item) =>
+                if (item.Status==SIRData.Infective && newPoolSize > 0)
                 {
-                    if ((item.Status & SIRData.Person_Infective) > 0)
+                    if (item.GroundCountdown <= span) //time's up, this guy should be grounded
                     {
-                        if (item.GroundCountdown <= span) //time's up, this guy should be grounded
-                        {
-                            item.GroundCountdown = TimeSpan.Zero;//clear ground countdown
+                        item.GroundCountdown = TimeSpan.Zero;//clear ground countdown
 
-                            if (Interlocked.Decrement(ref personsToGround) >= 0) //ground capcity is not full, do isolation
-                            {
-                                item.Status = SIRData.Person_Grounded;
-                            }
-                        }
-                        else
+                        if (Interlocked.Decrement(ref newPoolSize) >= 0) //ground capcity is not full, do isolation
                         {
-                            item.GroundCountdown -= span;
+                            item.Status = SIRData.Grounded;
+                            item.CureCountdown = CureDelay;
                         }
-
                     }
-                });
-            }
+                    else
+                    {
+                        item.GroundCountdown -= span;
+                    }
+                }
+            });
+            groundPoolRemain = Math.Max(newPoolSize, 0);
         }
 
         protected virtual void ProcessCure(T context, TimeSpan span)
         {
-
+            context.SIRInfo.ForAllParallel((ref SIRData item) =>
+            {
+                if (item.Status == SIRData.Grounded)
+                {
+                    if (item.CureCountdown<=span)
+                    {
+                        item.Status = SIRData.Recovered;
+                        item.CureCountdown = TimeSpan.Zero;
+                        Interlocked.Increment(ref groundPoolRemain);
+                    }
+                    else
+                    {
+                        item.CureCountdown -= span;
+                    }
+                }
+            });
         }
 
         public override void Init(T context)
         {
             base.Init(context);
+            groundPoolRemain = GroundPoolSize;
             infectedItems = new QuadTreeNode<PositionItem>(new System.Drawing.RectangleF(new PointF(0, 0), context.Size), (ref PositionItem x) =>
                 {
                     return x.Position;
                 }, 10, 32);
-            groundDuration = TimeSpan.Zero;
             context.SIRInfo.ForAllParallel((int idx, ref SIRData data) =>
             {
                 if (idx < initWithInfected)
                 {
-                    data.Status = SIRData.Person_Infective;
+                    data.Status = SIRData.Infective;
                     data.GroundCountdown = GroundDelay;
                 }
             });
+            
         }
     }
 }
