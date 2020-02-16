@@ -10,7 +10,7 @@ namespace VirusSimulator.Core
     public abstract class RunContext
     {
         
-        public DataBuffer<PositionItem> Persons { get; internal set; }
+        public DataBuffer<PositionItem> Persons { get; set; }
         public DateTime WorldClock { get; set; } 
         public SizeF Size { get;  set; }
 
@@ -20,6 +20,9 @@ namespace VirusSimulator.Core
         {
 
         }
+
+        public virtual void StepStart() { }
+        public virtual void StepEnd() { }
 
         public static T CreateInstance<T>(int personCount, DateTime clock, SizeF size, int bins = 10) where T:RunContext,new()
         {

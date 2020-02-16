@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="AssemblyInfo.cs" />
-    <Compile Remove="CustomControl1.cs" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VirusSimulator.Core\VirusSimulator.Core.csproj" />
-    <ProjectReference Include="..\VirusSimulator.ImageSharpOutput\VirusSimulator.ImageSharpOutput.csproj" />
+    <ProjectReference Include="..\VirusSimulator.Image\VirusSimulator.Image.csproj" />
+    <ProjectReference Include="..\VirusSimulator.Processor\VirusSimulator.Processor.csproj" />
   </ItemGroup>
 
 </Project>

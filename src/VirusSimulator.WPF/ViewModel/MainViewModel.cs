@@ -23,10 +23,12 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.IO;
 using SixLabors.Primitives;
-using VirusSimulator.ImageSharpOutput;
-using VirusSimulator.ImageSharpOutput.WPF;
 using System.Windows;
-using VirusSimulator.ImageSharpOutput.Plugins;
+using VirusSimulator.Image;
+using VirusSimulator.Image.WPF;
+using VirusSimulator.Image.Plugins;
+using System.Numerics;
+using VirusSimulator.SIR;
 //using System.Windows.Media;
 
 namespace VirusSimulator.WPF.ViewModel
@@ -46,27 +48,77 @@ namespace VirusSimulator.WPF.ViewModel
 
         public int POICount { get; set; } = 10;
 
-        public int InfectedInit { get; set; } = 3;
-        public float InfectionRate { get; set; } = 0.2f;
-        public float InfectionRadias { get; set; } = 2f;
+        public int InfectedInit { get; set; } = 10;
+        public float InfectionRate { get; set; } = 0.4f;
+        public float InfectionRadius { get; set; } = 3f;
         public long FrameIndex { get; private set; }
-
+        public float PersonActivity { get; set; } = 0.1f;
         public int? MaxInfectionRate { get; set; } = 80;
 
         private readonly int defaultFrameSkip = 5;
 
+        public bool? EnableRealtimeOutput { get; set; } = true;
+        public int? GroundPoolSize { get; set; } = 200;
+
         public List<DataPoint> HisData { get; } = new List<DataPoint>();
-        Runner<TestContext> runner;
 
+        public List<ColumnItem> SIRRunningTotal { get; } = new List<ColumnItem>();
 
-        ImageSharpProcessor<TestContext, Bgra32> imageProcessor;
-        public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
-        public MainViewModel()
+        public IEnumerable<DataPoint> RecentHisData
         {
-
+            get
+            {
+                return HisData.TakeLast(maxHisSteps);
+            }
         }
 
+        Runner<TestContext> runner;
 
+        private List<Vector2> startupPoints;
+
+        ImageProcessor<TestContext, Bgra32> imageProcessor;
+        public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
+
+        private int maxHisSteps = 100;
+        public string PointsInitSource { get; set; }
+
+        public string RunStatus { get; private set; }
+
+        private Stopwatch sw = new Stopwatch();
+
+        private long fps;
+
+        private Queue<TestContext> runHistory = new Queue<TestContext>();
+        public MainViewModel()
+        {
+            //ImagePositionLoader il = new ImagePositionLoader("d:\\temp\\test1.bmp", MapSize);
+            //il.TestOutput("d:\\temp\\test2.bmp", MapSize, 7000);
+            initStartup();
+        }
+
+        private void initStartup()
+        {
+            startupPoints = new List<Vector2>(PersonCount);
+            if (!string.IsNullOrWhiteSpace(PointsInitSource) && File.Exists(PointsInitSource))
+            {
+                ImagePositionLoader ipl = new ImagePositionLoader(PointsInitSource, MapSize);
+                foreach (var item in ipl.GetRandomPoints(PersonCount))
+                {
+                    startupPoints.Add(item);
+                }
+            }
+            //init random
+            for (int i = 0; i < PersonCount; i++)
+            {
+                startupPoints.Add(new Vector2(Helper.RandomFloat(MapSize), Helper.RandomFloat(MapSize)));
+            }
+        }
+
+        private void updateStatus(string value)
+        {
+            RunStatus = value;
+            raisePropertyChanged(nameof(RunStatus));
+        }
         public void DoTest()
         {
             //doStep();
@@ -79,40 +131,56 @@ namespace VirusSimulator.WPF.ViewModel
                 return;
             }
             HisData.Clear();
+            runHistory.Clear();
             runner = new Runner<TestContext>(PersonCount, 0, new System.Drawing.SizeF(MapSize, MapSize));
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6));
-            runner.Processors.Add(new TestVirusProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadias, InfectionRate = InfectionRate });
-
+            runner.Processors.Add(POIProcessor<TestContext>.CreateRandomPOI(POICount, MapSize / 6,PersonActivity));
+            //runner.Processors.Add(new TestVirusProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadias, InfectionRate = InfectionRate });
+            runner.Processors.Add(new SIRProcessor<TestContext>(InfectedInit) { InfectionRadius = InfectionRadius, InfectionRate = InfectionRate,GroundPoolSize=GroundPoolSize.Value });
             //var r = new SimpleProcessor<TestContext>(renderResult).AsOutput(2);
             //runner.Processors.Add(r);
 
-            imageProcessor = new ImageSharpProcessor<TestContext, Bgra32>(renderImageResult);
-            runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
 
-            var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
-            ImageSource = s.ImageSource;
-            imageProcessor.Plugins.Add(s);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
 
-            if (EnableGIFOutput == true)
+            if (EnableRealtimeOutput == true || EnableGIFOutput == true)
             {
-                imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                imageProcessor = new ImageProcessor<TestContext, Bgra32>(renderImageResult);
+                runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
+                var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
+
+                if (EnableRealtimeOutput == true)
+                {
+                    ImageSource = s.ImageSource;
+                    imageProcessor.Plugins.Add(s);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
+                }
+                if (EnableGIFOutput == true)
+                {
+                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(MapSize/3,MapSize/3 , new Color[] { Color.Black, Color.Red, Color.Yellow, Color.Green },  Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                }
+
+
             }
             runner.Processors.Add(new SimpleProcessor<TestContext>(updateUI)
-                .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
-                );
-
+                    .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
+                    );
 
             runner.OnStep += Runner_OnStep;
 
-            runner.Context.InitRandomPosition();
-            //runner.Context.InitCirclePosition(new System.Numerics.Vector2(runner.Context.Size.Width/2, runner.Context.Size.Height/2), 400);
+            initStartup();
+            runner.Context.Persons.ForAllParallel((int index, ref PositionItem item) =>
+            {
+                item.Position = startupPoints[index];
+            });
+            sw.Reset();
+            sw.Start();
+            
             runner.Start(StepGap);
 
         }
+
 
         private void raisePropertyChanged(params string[] names)
         {
@@ -130,52 +198,94 @@ namespace VirusSimulator.WPF.ViewModel
         }
         private void updateUI(TestContext _, TimeSpan __)
         {
+            long duration = (long)sw.Elapsed.TotalSeconds;
+            if (duration == 0)
+            {
+                return;
+            }
 
-            HisData.Add(new DataPoint(FrameIndex, Infected));
-            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(Infected), nameof(WorldClock));
+            SIRRunningTotal.Clear();
+            SIRRunningTotal.Add(new ColumnItem(Statistics.Infective));
+            SIRRunningTotal.Add(new ColumnItem(Statistics.Grounded));
+
+            fps = FrameIndex / (long)sw.Elapsed.TotalSeconds;
+            updateStatus($"Running {sw.Elapsed} fps={fps}");
+            HisData.Add(new DataPoint(FrameIndex, Statistics.Infective));
+            raisePropertyChanged(nameof(FrameIndex), nameof(HisData), nameof(RecentHisData), nameof(Statistics), nameof(WorldClock),nameof(SIRRunningTotal));
         }
 
         private void Runner_OnStep(object sender, StepInfo e)
         {
-            if (e.FrameIndex >= MaxSteps || (MaxInfectionRate.HasValue && Infected*100 / PersonCount >= MaxInfectionRate))
+            refreshStatistics();
+
+
+            
+            int infectedCount = Statistics.Infective;
+            if (e.FrameIndex >= MaxSteps 
+                || (MaxInfectionRate.HasValue && infectedCount * 100 / PersonCount >= MaxInfectionRate
+                || infectedCount == 0))
             {
                 e.IsCancel = true;
                 runner = null;
+                sw.Stop();
+                updateStatus($"Stopped Duration={sw.Elapsed} fps={fps}");
+                return;
             }
             FrameIndex = e.FrameIndex;
-
+            runHistory.Enqueue(runner.Context.Clone());
         }
 
         public void DoTestStop()
         {
             runner?.Stop();
             runner = null;
-
+            sw.Stop();
+            updateStatus($"Stopped Duration={sw.Elapsed} fps={fps}");
         }
         private void renderImageResult(IImageProcessingContext img, TestContext context)
         {
-            img.Fill(Color.White);
-            context.Persons.ForAllParallelWtihReference((context as IVirusContext).VirusData, (ref PositionItem p, ref InfectionData infection) =>
+            img.Fill(Color.Black);
+            //byte mask = SIRData.CanInfect | SIRData.CanInfectOthers;
+            context.Persons.ForAllParallelWtihReference(context.SIRInfo, (ref PositionItem p, ref SIRData infection) =>
             {
-                img.Draw(infection.IsInfected == InfectionData.Infected ? Color.Red : Color.Green, 5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(1, 1)));
+                if (infection.Status ==SIRData.Susceptible || infection.Status==SIRData.Infective)//can infect others or can be infected
+                {
+                    Color c;
+                    if (infection.Status ==SIRData.Susceptible)
+                    {
+                        c = Color.Green;
+                    }
+                    else
+                    {
+                        if (infection.GroundCountdown==TimeSpan.Zero)
+                        {
+                            c = Color.Red;
+                        }
+                        else
+                        {
+                            c = Color.Yellow;
+                        }
+                    }
+                    img.Draw(c, 5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(1, 1)));
+                }
+
+                
             });
         }
 
 
-
-
-
-        public int Infected
+        private void refreshStatistics()
         {
-            get
+            if (runner==null)
             {
-                if (runner == null)
-                {
-                    return 0;
-                }
-                return (runner.Context as IVirusContext).GetInfectedCount();
+                return;
             }
+            Statistics = (runner.Context as ISIRContext).GetCount();
         }
+
+
+        public SIRDataStatistics Statistics { get; private set; } = SIRDataStatistics.ZERO;
+        public string[] ColumnCategories { get; } = new string[2] { nameof(SIRData.Infective), nameof(SIRData.Grounded) };
 
         public DateTime WorldClock
         {

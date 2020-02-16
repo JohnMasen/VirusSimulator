@@ -5,24 +5,30 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using VirusSimulator.Core;
-using VirusSimulator.ImageSharpOutput;
+using VirusSimulator.Image;
 using VirusSimulator.Processor;
 using VirusSimulator.Processor.Test;
+using VirusSimulator.SIR;
 
 namespace VirusSimulator.WPF
 {
-    public class TestContext : RunContext, IVirusContext, IPersonMoveContext
+    public class TestContext : RunContext,ISIRContext, IPersonMoveContext
     {
-        DataBuffer<InfectionData> IVirusContext.VirusData { get; set; }
-        DataBuffer<MoveStatus> IPersonMoveContext.MoveStatus { get; set; }
-        public Image<Bgra32> Image { get; set; }
+        public DataBuffer<MoveStatus> MoveStatus { get; set; }
+
+        public DataBuffer<SIRData> SIRInfo { get; private set; }
 
         protected override void Init()
         {
             base.Init();
-            (this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
+            //(this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
+            SIRInfo = new DataBuffer<SIRData>(Persons.Items.Length, 0, _ =>
+            {
+                return new SIRData() { Status = SIRData.Susceptible };
+            });
             (this as IPersonMoveContext).MoveStatus = new DataBuffer<MoveStatus>(Persons.Items.Length, Persons.Bins, (index) =>
             {
                 return new MoveStatus() { ID = index, CurrentTarget = Vector2.Zero, IsMovingToTarget = MovingStatusEnum.Idle };
@@ -38,14 +44,31 @@ namespace VirusSimulator.WPF
             });
         }
 
-        public void InitCirclePosition(Vector2 center, float radias)
+        public void InitCirclePosition(Vector2 center, float radius)
         {
             Persons.ForAllParallel((int index, ref PositionItem p) =>
             {
                 p.MoveTo(center);
                 p.Rotate(Helper.RandomFloat(Helper.TwoPI));
-                p.Move(0, Helper.RandomFloat(radias));
+                p.Move(0, Helper.RandomFloat(radius));
             });
+        }
+
+        public int DataSize { get
+            {
+                return Persons.DataBufferSize+(this as IPersonMoveContext).MoveStatus.DataBufferSize+SIRInfo.DataBufferSize;
+            } 
+        }
+        public TestContext Clone()
+        {
+            return new TestContext()
+            {
+                SIRInfo = SIRInfo.Clone(),
+                Persons = Persons.Clone(),
+                MoveStatus = MoveStatus.Clone(),
+                WorldClock = WorldClock,
+                Size = Size
+            };
         }
     }
 }
