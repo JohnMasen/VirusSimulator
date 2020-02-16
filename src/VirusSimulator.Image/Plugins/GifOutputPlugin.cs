@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,12 +13,14 @@ namespace VirusSimulator.Image.Plugins
     {
         private int w, h;
         private Image<TPixel> gif;
-        bool isFirst = false;
+        //bool isFirst = false;
         public string OutputPath { get; private set; }
-        public GifOutputPlugin(int width, int height,string outputPath=null)
+        private Color[] pattern;
+        public GifOutputPlugin(int width, int height,Color[] colorPattern, string outputPath=null)
         {
             w = width;
             h = height;
+            pattern = colorPattern;
             if (string.IsNullOrWhiteSpace(outputPath))
             {
                 OutputPath = "Output.gif";
@@ -41,7 +44,14 @@ namespace VirusSimulator.Image.Plugins
         public void Init(Image<TPixel> image)
         {
             gif = new Image<TPixel>(w, h);
-            isFirst = true;
+            //isFirst = true;
+            gif.Mutate(op =>
+            {
+                for (int i = 0; i < pattern.Length; i++)
+                {
+                    op.DrawLines(pattern[i], 1, new PointF(0, i), new PointF(1, i));
+                }
+            });
         }
 
         public void OnDraw(Image<TPixel> image)
@@ -55,11 +65,11 @@ namespace VirusSimulator.Image.Plugins
                 });
             };
             gif.Frames.AddFrame(f.Frames.RootFrame);
-            if (isFirst)
-            {
-                gif.Frames.RemoveFrame(0);//remove first empty frame
-                isFirst = false;
-            }
+            //if (isFirst)
+            //{
+            //    gif.Frames.RemoveFrame(0);//remove first empty frame
+            //    isFirst = false;
+            //}
         }
     }
 }

@@ -155,7 +155,7 @@ namespace VirusSimulator.WPF.ViewModel
                 }
                 if (EnableGIFOutput == true)
                 {
-                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(300, 300, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(MapSize/3,MapSize/3 , new Color[] { Color.Black, Color.Red, Color.Yellow, Color.Green },  Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
                 }
 
 
