@@ -39,9 +39,8 @@ namespace VirusSimulator.Image
 
         public IEnumerable<Vector2> GetRandomPoints(int count)
         {
-            int maxValue = count * 255;
             return (from item in points
-                    orderby (item.score * 255 + Helper.RandomInt(maxValue)) descending
+                    orderby (item.score * 255 + Helper.RandomInt(255)) descending
                     select item.position).Take(count);
         }
 

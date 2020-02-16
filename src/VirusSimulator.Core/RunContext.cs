@@ -10,7 +10,7 @@ namespace VirusSimulator.Core
     public abstract class RunContext
     {
         
-        public DataBuffer<PositionItem> Persons { get; internal set; }
+        public DataBuffer<PositionItem> Persons { get; set; }
         public DateTime WorldClock { get; set; } 
         public SizeF Size { get;  set; }
 

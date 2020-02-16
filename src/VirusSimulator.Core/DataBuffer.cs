@@ -7,10 +7,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Buffers;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace VirusSimulator.Core
 {
-    public class DataBuffer<T> where T : struct
+    public class DataBuffer<T>  where T : struct
     {
         private struct BlockIndex
         {
@@ -22,39 +23,61 @@ namespace VirusSimulator.Core
         public delegate void EditItemDelegate(ref T item);
         public delegate void EditItemWithIndexDelegate(int index, ref T item);
         readonly List<BlockIndex> blocks = new List<BlockIndex>();
-        //private List<MemoryHandle> mh = new List<MemoryHandle>();
         public int Bins => blocks.Count;
-        
+
+
         public DataBuffer(int size, int bins, Func<int, T> creationCallback)
         {
-            
+
             T[] data = new T[size];
             for (int i = 0; i < data.Length; i++)
             {
                 data[i] = creationCallback(i);
             }
-            initFromArray(data, bins);
-            //mh.Add(buffer.Pin());
+            initFromMemory(data, bins);
         }
-        public DataBuffer(int size, int bins=0) : this(new T[size], bins)
+        public DataBuffer(int size, int bins = 0) : this(new T[size], bins)
         {
 
         }
 
-        public DataBuffer(T[] data, int bins=0)
+        public DataBuffer(Memory<T> data, int bins = 0)
         {
-            initFromArray(data ?? throw new ArgumentNullException(nameof(data)), bins);
+            initFromMemory(data, bins);
         }
 
-        private void initFromArray(T[] data, int bins)
+        public void Load(Span<byte> source, int bins = 0)
         {
-            initBlocks(data.Length,bins);
-            buffer = data.AsMemory();
+            if (source.Length % DataSize != 0)
+            {
+                throw new ArgumentException("source does not contain correct bytes");
+            }
+            int size = source.Length / DataSize;
+            Memory<T> tmp = new T[size];
+            source.CopyTo(MemoryMarshal.AsBytes(tmp.Span));
+            initFromMemory(tmp, bins);
+        }
+
+        public void CopyTo(Span<byte> target)
+        {
+            MemoryMarshal.AsBytes(buffer.Span).CopyTo(target);
+        }
+
+        public DataBuffer<T> Clone()
+        {
+            return new DataBuffer<T>(buffer.ToArray(), Bins);
+        }
+
+        private void initFromMemory(Memory<T> data, int bins)
+        {
+            initBlocks(data.Length, bins);
+            buffer = data;
             Items = buffer;
         }
 
         private void initBlocks(int size, int bins = 0)
         {
+            blocks.Clear();
             if (bins <= 0)
             {
                 bins = size < 100 ? 1 : Environment.ProcessorCount * 2;
@@ -81,14 +104,14 @@ namespace VirusSimulator.Core
         {
             blocks.AsParallel().ForAll(block =>
             {
-                a(buffer.Slice(block.pos,block.length));
+                a(buffer.Slice(block.pos, block.length));
             });
         }
         public void ForAllParallel(EditItemWithIndexDelegate a)
         {
             blocks.AsParallel().ForAll(block =>
             {
-                for (int i = block.pos; i < block.length+block.pos; i++)
+                for (int i = block.pos; i < block.length + block.pos; i++)
                 {
                     a(i, ref buffer.Span[i]);
                 }
@@ -112,9 +135,9 @@ namespace VirusSimulator.Core
             var s = buffer.Span.Slice(start, length);
             for (int i = 0; i < length; i++)
             {
-                a(i+start, ref buffer.Span[i]);
+                a(i + start, ref buffer.Span[i]);
             }
-            
+
         }
 
         public void ForAll(Action<Memory<T>> action)
@@ -126,7 +149,7 @@ namespace VirusSimulator.Core
         {
             for (int i = 0; i < buffer.Length; i++)
             {
-                action(i,ref buffer.Span[i]);
+                action(i, ref buffer.Span[i]);
             }
         }
         public void ForAll(EditItemDelegate action)
@@ -140,9 +163,9 @@ namespace VirusSimulator.Core
 
 
 
-        public void CheckCompatible<TTarget>(DataBuffer<TTarget> target)where TTarget:struct
+        public void CheckCompatible<TTarget>(DataBuffer<TTarget> target) where TTarget : struct
         {
-            if (target.Items.Length!=Items.Length)
+            if (target.Items.Length != Items.Length)
             {
                 throw new ArgumentException("target must have same items as current databuffer");
             }
@@ -152,6 +175,13 @@ namespace VirusSimulator.Core
             //}
         }
 
-
+        public int DataSize => Marshal.SizeOf<T>();
+        public int DataBufferSize
+        {
+            get
+            {
+                return DataSize * buffer.Length;
+            }
+        }
     }
 }

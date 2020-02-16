@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using VirusSimulator.Core;
 using VirusSimulator.Image;
@@ -16,8 +17,7 @@ namespace VirusSimulator.WPF
 {
     public class TestContext : RunContext,ISIRContext, IPersonMoveContext
     {
-        DataBuffer<MoveStatus> IPersonMoveContext.MoveStatus { get; set; }
-        public Image<Bgra32> Image { get; set; }
+        public DataBuffer<MoveStatus> MoveStatus { get; set; }
 
         public DataBuffer<SIRData> SIRInfo { get; private set; }
 
@@ -54,5 +54,21 @@ namespace VirusSimulator.WPF
             });
         }
 
+        public int DataSize { get
+            {
+                return Persons.DataBufferSize+(this as IPersonMoveContext).MoveStatus.DataBufferSize+SIRInfo.DataBufferSize;
+            } 
+        }
+        public TestContext Clone()
+        {
+            return new TestContext()
+            {
+                SIRInfo = SIRInfo.Clone(),
+                Persons = Persons.Clone(),
+                MoveStatus = MoveStatus.Clone(),
+                WorldClock = WorldClock,
+                Size = Size
+            };
+        }
     }
 }

@@ -87,6 +87,8 @@ namespace VirusSimulator.WPF.ViewModel
         private Stopwatch sw = new Stopwatch();
 
         private long fps;
+
+        private Queue<TestContext> runHistory = new Queue<TestContext>();
         public MainViewModel()
         {
             //ImagePositionLoader il = new ImagePositionLoader("d:\\temp\\test1.bmp", MapSize);
@@ -129,6 +131,7 @@ namespace VirusSimulator.WPF.ViewModel
                 return;
             }
             HisData.Clear();
+            runHistory.Clear();
             runner = new Runner<TestContext>(PersonCount, 0, new System.Drawing.SizeF(MapSize, MapSize));
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
@@ -163,10 +166,6 @@ namespace VirusSimulator.WPF.ViewModel
             runner.Processors.Add(new SimpleProcessor<TestContext>(updateUI)
                     .AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip))
                     );
-
-
-
-
 
             runner.OnStep += Runner_OnStep;
 
@@ -219,9 +218,8 @@ namespace VirusSimulator.WPF.ViewModel
         {
             refreshStatistics();
 
+
             
-
-
             int infectedCount = Statistics.Infective;
             if (e.FrameIndex >= MaxSteps 
                 || (MaxInfectionRate.HasValue && infectedCount * 100 / PersonCount >= MaxInfectionRate
@@ -231,9 +229,10 @@ namespace VirusSimulator.WPF.ViewModel
                 runner = null;
                 sw.Stop();
                 updateStatus($"Stopped Duration={sw.Elapsed} fps={fps}");
+                return;
             }
             FrameIndex = e.FrameIndex;
-
+            runHistory.Enqueue(runner.Context.Clone());
         }
 
         public void DoTestStop()
