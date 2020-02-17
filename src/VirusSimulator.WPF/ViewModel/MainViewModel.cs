@@ -29,6 +29,7 @@ using VirusSimulator.Image.WPF;
 using VirusSimulator.Image.Plugins;
 using System.Numerics;
 using VirusSimulator.SIR;
+using Microsoft.Win32;
 //using System.Windows.Media;
 
 namespace VirusSimulator.WPF.ViewModel
@@ -111,6 +112,63 @@ namespace VirusSimulator.WPF.ViewModel
             for (int i = 0; i < PersonCount; i++)
             {
                 startupPoints.Add(new Vector2(Helper.RandomFloat(MapSize), Helper.RandomFloat(MapSize)));
+            }
+        }
+
+        public void SaveCSV()
+        {
+            if (runHistory.Count==0)
+            {
+                return;
+            }
+            SaveFileDialog sfd = new SaveFileDialog()
+            {
+                AddExtension = true,
+                Filter = "CSVFiles|*.csv",
+                FilterIndex = 0
+            };
+            if(sfd.ShowDialog()==true)
+            {
+                updateStatus("Saving CSV...");
+                using (StreamWriter writer=new StreamWriter(sfd.FileName,false))
+                {
+                    int frameId = 0;
+                    
+                    writer.WriteLine("FrameID,Susceptible,Infective,Grounded,Recovered");
+                    foreach (var item in runHistory)
+                    {
+                        int infective = 0;
+                        int susceptible = 0;
+                        int grounded = 0;
+                        int recovered = 0;
+                        item.SIRInfo.ForAllParallelWtihReference(item.Persons, (ref SIRData sir, ref PositionItem pos) =>
+                         {
+                             switch (sir.Status)
+                             {
+                                 case SIRData.Infective:
+                                     Interlocked.Increment(ref infective);
+                                     break;
+                                 case SIRData.Susceptible:
+                                     Interlocked.Increment(ref susceptible);
+                                     break;
+                                 case SIRData.Grounded:
+                                     Interlocked.Increment(ref grounded);
+                                     break;
+                                 case SIRData.Recovered:
+                                     Interlocked.Increment(ref recovered);
+                                     break;
+                                 default:
+                                     break;
+                             }
+
+                         });
+                        writer.WriteLine($"{frameId++},{susceptible},{infective},{grounded},{recovered}");
+                    }
+                    
+                }
+                updateStatus($"CSV Saved to {sfd.FileName}");
+
+
             }
         }
 
@@ -232,7 +290,7 @@ namespace VirusSimulator.WPF.ViewModel
                 return;
             }
             FrameIndex = e.FrameIndex;
-            runHistory.Enqueue(runner.Context.Clone());
+            runHistory.Enqueue((sender as Runner<TestContext>).Context.Clone());
         }
 
         public void DoTestStop()

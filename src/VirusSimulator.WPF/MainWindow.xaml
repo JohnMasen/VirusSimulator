@@ -52,6 +52,13 @@
                 <Label Content="最大感染率" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
                 <Slider HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="182" Maximum="100" Value="{Binding MaxInfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" TickFrequency="10" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
                 <CheckBox Content="实时预览" HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableRealtimeOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <Button Content="CSV" HorizontalAlignment="Left" Margin="26,67,0,0" VerticalAlignment="Top">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="SaveCSV"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </Button>
             </Grid>
         </Grid>
 
