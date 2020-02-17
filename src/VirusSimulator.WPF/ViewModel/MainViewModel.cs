@@ -204,7 +204,7 @@ namespace VirusSimulator.WPF.ViewModel
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
-            //ImagePositionLoader p = new ImagePositionLoader("d:\\temp\\map1_poi.jpg",MapSize);
+            //ImagePositionLoader p = new ImagePositionLoader("d:\\temp\\map1_poi.jpg", MapSize);
             //poiProcessor = POIProcessor<TestContext>.CreateFromPoints(p.GetRandomPoints(POICount));
             poiProcessor = POIProcessor<TestContext>.CreateRandomPOI(POICount, PersonActivity);
             poiProcessor.POIScanRadiusLarge = MapSize / 6;
@@ -246,7 +246,7 @@ namespace VirusSimulator.WPF.ViewModel
             initStartup();
             runner.Context.Persons.ForAllParallel((int index, ref PositionItem item) =>
             {
-                item.Position = startupPoints[index];
+                item.Move(startupPoints[index]);
             });
             sw.Reset();
             sw.Start();
@@ -360,7 +360,7 @@ namespace VirusSimulator.WPF.ViewModel
 
             //});
 
-            //render POI
+            //render POIInfo
             //context.POIData.ForAllParallel((ref POIInfo poi) =>
             //{
             //    img.Draw(Color.Yellow, 5, new SixLabors.Shapes.RectangularPolygon(poi.HomePosition, new SizeF(1, 1)));
@@ -369,6 +369,7 @@ namespace VirusSimulator.WPF.ViewModel
             //{
             //    img.Draw(Color.Red, 5, new SixLabors.Shapes.RectangularPolygon(item, new SizeF(1, 1)));
             //}
+            //render POI
             //context.Persons.ForAllParallel((int index, ref PositionItem pos) =>
             //{
             //    foreach (var item in poiProcessor.POIIndex.GetItemsInDistance(pos.Position, poiProcessor.POIScanRadiusLarge))

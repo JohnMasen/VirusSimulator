@@ -12,7 +12,7 @@ namespace VirusSimulator.Core.QuadTree
     public class QuadTreeNode<T>
     {
         public readonly RectangleF Range;
-        public Lazy<List<T>> Items=new Lazy<List<T>>();
+        private Lazy<List<T>> Items=new Lazy<List<T>>();
         private readonly int capacity;
         private Vector2 center;
         public List<QuadTreeNode<T>> Children;
