@@ -15,10 +15,10 @@ using VirusSimulator.SIR;
 
 namespace VirusSimulator.WPF
 {
-    public class TestContext : RunContext,ISIRContext, IPersonMoveContext
+    public class TestContext : RunContext,ISIRContext, IPersonMoveContext,IPOIContext
     {
         public DataBuffer<MoveStatus> MoveStatus { get; set; }
-
+        public DataBuffer<POIInfo> POIData { get; set; }
         public DataBuffer<SIRData> SIRInfo { get; private set; }
 
         protected override void Init()
@@ -33,6 +33,10 @@ namespace VirusSimulator.WPF
             {
                 return new MoveStatus() { ID = index, CurrentTarget = Vector2.Zero, IsMovingToTarget = MovingStatusEnum.Idle };
             });
+            POIData = new DataBuffer<POIInfo>(Persons.Items.Length, Persons.Bins, _ =>
+                {
+                    return new POIInfo() { POIStatus = POIStatusEnum.AtHome };
+                });
         }
 
         public void InitRandomPosition()
@@ -59,6 +63,9 @@ namespace VirusSimulator.WPF
                 return Persons.DataBufferSize+(this as IPersonMoveContext).MoveStatus.DataBufferSize+SIRInfo.DataBufferSize;
             } 
         }
+
+        
+
         public TestContext Clone()
         {
             return new TestContext()
@@ -66,6 +73,7 @@ namespace VirusSimulator.WPF
                 SIRInfo = SIRInfo.Clone(),
                 Persons = Persons.Clone(),
                 MoveStatus = MoveStatus.Clone(),
+                POIData = POIData.Clone(),
                 WorldClock = WorldClock,
                 Size = Size
             };

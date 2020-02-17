@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,7 +31,7 @@ namespace VirusSimulator.Core.QuadTree
             }
             Range = range;
             capacity = Capacity;
-            center = new Vector2(Range.X + Range.Width / 2, Range.Top + Range.Height / 2);
+            center = new Vector2(Range.X + Range.Width / 2, Range.Y + Range.Height / 2);
             getPosition = getPositionCallback;
         }
         public void AddItem(T newItem)
@@ -96,6 +97,7 @@ namespace VirusSimulator.Core.QuadTree
             return IsIntersectWithCircleInternal(circleCenter, radius * radius);
         }
 
+        //this feature does not work! don't use it until fixed
         private bool IsIntersectWithCircleInternal(Vector2 circleCenter,float radiusSqr)
         {
             if (Range.Contains(circleCenter.X, circleCenter.Y)) //check if the center inside the range
@@ -107,13 +109,19 @@ namespace VirusSimulator.Core.QuadTree
             Vector2 e = Vector2.Max(a - (new Vector2(Range.Right, Range.Top) - center), Vector2.Zero);
             return Vector2.Dot(e, e) <= radiusSqr;//use dot instead of lengthsquart to prevent boxing
         }
+        private bool IsIntersectWithRectangleInternal(RectangleF rect)
+        {
+            return this.Range.IntersectsWith(rect);
+        }
 
         public IEnumerable<T> GetItemsInDistance(Vector2 position,float distance)
         {
-            return GetItemInDistanceInternal(position,distance * distance);
+            RectangleF f = new RectangleF(position.X - distance, position.Y - distance, distance*2, distance*2);
+            //f.Intersect(Range);
+            return GetItemInDistanceInternal(position,f, distance * distance);
         }
 
-        private IEnumerable<T> GetItemInDistanceInternal(Vector2 position, float distanceSqr)
+        private IEnumerable<T> GetItemInDistanceInternal(Vector2 position,RectangleF rect, float distanceSqr)
         {
             
             if (IsLeaf)
@@ -126,15 +134,16 @@ namespace VirusSimulator.Core.QuadTree
                 foreach (var item in Children)
                 {
                     
-                    if (item.IsIntersectWithCircleInternal(position,distanceSqr))
+                    if (item.IsIntersectWithRectangleInternal(rect))
                     {
                         if (result==null)
                         {
-                            result = item.GetItemInDistanceInternal(position, distanceSqr);
+                            result = item.GetItemInDistanceInternal(position, rect, distanceSqr);
+                            Debug.Assert(result != null);
                         }
                         else
                         {
-                            result = result.Concat(item.GetItemInDistanceInternal(position, distanceSqr));
+                            result = result.Concat(item.GetItemInDistanceInternal(position,rect, distanceSqr));
                         }
                         
                     }
