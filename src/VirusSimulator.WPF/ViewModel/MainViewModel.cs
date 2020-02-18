@@ -204,9 +204,10 @@ namespace VirusSimulator.WPF.ViewModel
             //runner.Processors.Add(new TestPersonMoveProcessor<TestContext>());
             //runner.Processors.Add(new RandomMoveProcessor<TestContext>() { Speed = 4 });
             runner.Processors.Add(new PersonMoveProcessor<TestContext>());
+
             //ImagePositionLoader p = new ImagePositionLoader("d:\\temp\\map1_poi.jpg", MapSize);
             //poiProcessor = POIProcessor<TestContext>.CreateFromPoints(p.GetRandomPoints(POICount));
-            poiProcessor = POIProcessor<TestContext>.CreateRandomPOI(POICount, PersonActivity);
+            poiProcessor = initPOI();
             poiProcessor.POIScanRadiusLarge = MapSize / 6;
             poiProcessor.POIScanRadiusSmall = MapSize/6/10;
             poiProcessor.Activity = PersonActivity;
@@ -232,7 +233,7 @@ namespace VirusSimulator.WPF.ViewModel
                 }
                 if (EnableGIFOutput == true)
                 {
-                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(MapSize/3,MapSize/3 , new Color[] { Color.Black, Color.Red, Color.Yellow, Color.Green },  Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
+                    imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(MapSize/3,MapSize/3 ,  Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
                 }
 
 
@@ -253,6 +254,28 @@ namespace VirusSimulator.WPF.ViewModel
             
             runner.Start(StepGap);
 
+        }
+
+        private POIProcessor<TestContext> initPOI()
+        {
+            if (string.IsNullOrEmpty(PointsInitSource))
+            {
+                return POIProcessor<TestContext>.CreateRandomPOI(POICount, PersonActivity);
+            }
+            else
+            {
+                string ex = Path.GetExtension(PointsInitSource);
+                string path=Path.ChangeExtension(PointsInitSource, $"poi.{ex}");
+                if (File.Exists(path))
+                {
+                    ImagePositionLoader ipl = new ImagePositionLoader(path, MapSize);
+                    return POIProcessor<TestContext>.CreateFromPoints(ipl.GetRandomPoints(POICount));
+                }
+                else
+                {
+                    return POIProcessor<TestContext>.CreateRandomPOI(POICount, PersonActivity);
+                }
+            }
         }
 
 
@@ -345,17 +368,17 @@ namespace VirusSimulator.WPF.ViewModel
 
 
             });
-            //context.Persons.ForAllParallelWtihReference(context.POIData, (ref PositionItem p, ref POIInfo poi) =>
+            //    context.Persons.ForAllParallelWtihReference(context.POIData, (ref PositionItem p, ref POIInfo poi) =>
             //{
-            //        Color c;
-            //    c =poi.POIStatus switch
+            //    Color c;
+            //    c = poi.POIStatus switch
             //    {
-            //        POIStatusEnum.AtHome=>Color.White,
-            //        POIStatusEnum.FromHomeToPOI=>Color.Blue,
-            //        POIStatusEnum.FromPOIToPOI=>Color.Yellow,
-            //        POIStatusEnum.GoHome=>Color.Red
+            //        POIStatusEnum.AtHome => Color.White,
+            //        POIStatusEnum.FromHomeToPOI => Color.Green,
+            //        POIStatusEnum.FromPOIToPOI => Color.Yellow,
+            //        POIStatusEnum.GoHome => Color.Red
             //    };
-            //    img.Draw(c, 5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(1, 1)));
+            //    img.Draw(c, 5, new SixLabors.Shapes.RectangularPolygon(p.Position, new SizeF(10, 10)));
 
 
             //});
