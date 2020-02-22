@@ -35,7 +35,6 @@ namespace VirusSimulator.SIR
         QuadTreeNode<PositionItem> infectedItems;
         public override void Process(T context, TimeSpan span)
         {
-            //var x1 = (context as ISIRContext).GetCount();
             infectedItems.Clear();
             //refresh infected person indexer
             context.SIRInfo.ForAllWtihReference(context.Persons, (ref SIRData sir, ref PositionItem pos) =>
@@ -48,12 +47,9 @@ namespace VirusSimulator.SIR
 
             //try to be infected
             ProcessInfection(context, span);
-            //var x2 = (context as ISIRContext).GetCount();
             //update ground info
             ProcessGround(context, span);
-            //var x3 = (context as ISIRContext).GetCount();
             ProcessCure(context, span);
-            //var x4 = (context as ISIRContext).GetCount();
         }
 
         protected virtual void ProcessInfection(T context, TimeSpan span)
