@@ -31,7 +31,7 @@
                     <sSharp:SeeingSharpRendererElement x:Name="CtrlRender" Width="2000" Height="2000"  />
                     <!--<local:RenderControl Width="1000" Height="1000"/>-->
                 </Viewbox>
-                
+
             </Grid>
             <Grid>
                 <Grid.RowDefinitions>
@@ -64,7 +64,7 @@
                 <Label Content="最大感染率" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
                 <Slider HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="182" Maximum="100" Value="{Binding MaxInfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" TickFrequency="10" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
                 <CheckBox Content="实时预览" HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableRealtimeOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
-                <Button Content="CSV" HorizontalAlignment="Left" Margin="26,67,0,0" VerticalAlignment="Top">
+                <Button Content="CSV" HorizontalAlignment="Left" Margin="141,56,0,0" VerticalAlignment="Top">
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="Click">
                             <b:CallMethodAction TargetObject="{Binding Mode=OneWay}" MethodName="SaveCSV"/>
@@ -72,6 +72,7 @@
                     </b:Interaction.Triggers>
                 </Button>
                 <CheckBox Content="自动停止" HorizontalAlignment="Left" Margin="6,109,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableAutoStop, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <CheckBox Content="启用CSV导出" HorizontalAlignment="Left" Margin="30,56,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableCSVExport, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
             </Grid>
         </Grid>
 

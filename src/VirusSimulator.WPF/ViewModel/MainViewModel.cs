@@ -92,6 +92,7 @@ namespace VirusSimulator.WPF.ViewModel
         private long fps;
 
         private Queue<TestContext> runHistory = new Queue<TestContext>();
+        public bool EnableCSVExport { get; set; } = false;
 
         public bool EnableAutoStop { get; set; } = true;
         private POIProcessor<TestContext> poiProcessor;
@@ -338,7 +339,10 @@ namespace VirusSimulator.WPF.ViewModel
                 return;
             }
             FrameIndex = e.FrameIndex;
-            runHistory.Enqueue((sender as Runner<TestContext>).Context.Clone());
+            if (EnableCSVExport)
+            {
+                runHistory.Enqueue((sender as Runner<TestContext>).Context.Clone());
+            } 
         }
 
         public void DoTestStop()

@@ -77,19 +77,12 @@ namespace VirusSimulator.WPF
                      var pos = p.Position;
                      newList.Add((graph) =>
                      {
-                         graph.DrawEllipse(pos, 2, 2, c);
+                         graph.DrawRectangle(new RectangleF(pos.X,pos.Y, 2, 2), c);
                      });
                  }
                  
              });
 
-            //foreach (var item in context.Persons.Items.Span)
-            //{
-            //    newList.Add((graph) =>
-            //    {
-            //        graph.DrawEllipse(item.Position,2,2, redBrush);
-            //    });
-            //}
             lock (drawSync)
             {
                 drawCommands = newList;
