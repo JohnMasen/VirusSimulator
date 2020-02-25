@@ -26,9 +26,9 @@
                     <RowDefinition Height="54*"/>
                     <RowDefinition Height="67*"/>
                 </Grid.RowDefinitions>
-                <Image x:Name="image1" Source="{Binding ImageSource, Mode=OneWay}" Grid.RowSpan="1"/>
-                <Viewbox Grid.Row="1">
-                    <sSharp:SeeingSharpRendererElement x:Name="CtrlRender" Width="2000" Height="2000"  />
+                <!--<Image x:Name="image1" Source="{Binding ImageSource, Mode=OneWay}" Grid.RowSpan="1"/>-->
+                <Viewbox Grid.Row="0" Grid.RowSpan="2">
+                    <sSharp:SeeingSharpRendererElement x:Name="CtrlRender" Width="{Binding MapSize}" Height="{Binding MapSize}"  />
                     <!--<local:RenderControl Width="1000" Height="1000"/>-->
                 </Viewbox>
 
@@ -102,7 +102,7 @@
         <Slider HorizontalAlignment="Left" Margin="566,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="10000" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
         <TextBlock HorizontalAlignment="Left" Margin="69,40,0,0" Text="FrameSkip" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Margin="129,42,0,0" Text="{Binding FrameSkip}" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
-        <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="30000" Minimum="1" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
+        <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="70000" Minimum="1" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
         <TextBox HorizontalAlignment="Left" Margin="285,15,0,0" Text="{Binding PointsInitSource, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="197"/>
         <Label Content="图片初始化" HorizontalAlignment="Left" Margin="215,13,0,0" VerticalAlignment="Top"/>
         <TextBlock Grid.Row="3" VerticalAlignment="Bottom" Height="20" Text="{Binding RunStatus, Mode=OneWay}"/>

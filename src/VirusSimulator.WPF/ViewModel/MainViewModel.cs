@@ -41,12 +41,12 @@ namespace VirusSimulator.WPF.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int? FrameSkip { get; set; } = 5;
+        public int? FrameSkip { get; set; } = 3;
         public bool? EnableGIFOutput { get; set; } = false;
         public string GifOutputPath { get; set; } = Environment.CurrentDirectory;
         public int? MaxSteps { get; set; } = int.MaxValue;
         public TimeSpan StepGap { get; set; } = TimeSpan.FromHours(1);
-        public int PersonCount { get; set; } = 7000;
+        public int PersonCount { get; set; } = 10000;
         public int MapSize { get; set; } = 2000;
 
         public int POICount { get; set; } = 1000;
@@ -80,7 +80,7 @@ namespace VirusSimulator.WPF.ViewModel
         private List<Vector2> startupPoints;
 
         ImageProcessor<TestContext, Bgra32> imageProcessor;
-        public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
+        //public System.Windows.Media.Imaging.WriteableBitmap ImageSource { get; private set; }
 
         private int maxHisSteps = 100;
         public string PointsInitSource { get; set; }
@@ -223,25 +223,25 @@ namespace VirusSimulator.WPF.ViewModel
 
 
 
-            if (EnableRealtimeOutput == true || EnableGIFOutput == true)
+            if (EnableGIFOutput == true)
             {
                 imageProcessor = new ImageProcessor<TestContext, Bgra32>(renderImageResult);
                 runner.Processors.Add(imageProcessor.AsOutput(FrameSkip.GetValueOrDefault(defaultFrameSkip)));
                 var s = new ImageSourceHandler<Bgra32>(MapSize, MapSize, System.Windows.Media.PixelFormats.Bgra32);
 
-                if (EnableRealtimeOutput == true)
-                {
-                    ImageSource = s.ImageSource;
-                    imageProcessor.Plugins.Add(s);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
-                }
+                //if (EnableRealtimeOutput == true)
+                //{
+                //    ImageSource = s.ImageSource;
+                //    imageProcessor.Plugins.Add(s);
+                //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
+                //}
                 if (EnableGIFOutput == true)
                 {
                     imageProcessor.Plugins.Add(new GifOutputPlugin<Bgra32>(MapSize / 3, MapSize / 3, Path.Combine(GifOutputPath, DateTime.Now.ToString("yyyyMMdd_HHMMss") + ".gif")));
                 }
-
-
             }
+            
+            D2DRenderHelper.Enabled = EnableRealtimeOutput.GetValueOrDefault(false);
             runner.Processors.Add(new SimpleProcessor<TestContext>((context,span)=>
             {
                 updateUI(context,span);

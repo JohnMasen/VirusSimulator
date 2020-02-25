@@ -16,6 +16,7 @@ namespace VirusSimulator.WPF
     public class D2DRenderHelper 
     {
         private List<Action<Graphics2D>> drawCommands = new List<Action<Graphics2D>>();
+        public bool Enabled { get; set; } = true;
         private object drawSync = new object();
         BrushResource redBrush = new SolidBrushResource(Color4.RedColor);
         BrushResource greeBrush = new SolidBrushResource(Color4.GreenColor);
@@ -52,6 +53,10 @@ namespace VirusSimulator.WPF
 
         public void UpdateCommands(TestContext context)
         {
+            if (!Enabled)
+            {
+                return;
+            }
             List<Action<Graphics2D>> newList = new List<Action<Graphics2D>>();
             context.Persons.ForAllWtihReference(context.SIRInfo, (ref PositionItem p, ref SIRData infection) =>
              {
