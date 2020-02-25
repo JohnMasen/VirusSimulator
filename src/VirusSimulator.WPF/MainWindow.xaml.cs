@@ -3,6 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,9 +31,19 @@ namespace VirusSimulator.WPF
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            if (DesignerProperties.GetIsInDesignMode(this))
+            {
+                return;
+            }
+            (DataContext as MainViewModel).D2DRenderHelper.Init(CtrlRender.RenderLoop);
         }
 
+        //private void RenderLoop_PrepareRender(object sender, EventArgs e)
+        //{
+            
+        //}
+
         
+
     }
 }
