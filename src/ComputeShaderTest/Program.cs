@@ -140,6 +140,7 @@ namespace ComputeShaderTest
                     while (sb.Elapsed < duration)
                     {
                         run(idx, buffer1, buffer2);
+                        acc.Synchronize();
                         count++;
                         if (copyBack)
                         {
