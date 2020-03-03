@@ -1,4 +1,7 @@
-﻿using ComputeSharp;
+﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Validators;
+using ComputeSharp;
 using ComputeSharp.Graphics;
 using ILGPU;
 using ILGPU.Algorithms;
@@ -6,6 +9,7 @@ using ILGPU.Runtime;
 using SharpGen.Runtime;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using VirusSimulator.Core;
 
@@ -18,7 +22,14 @@ namespace ComputeShaderTest
         bool copyBack = true;
         static void Main(string[] args)
         {
-            new Program().Run(args);
+            //new Program().Run(args);
+            //BenchmarkRunner.Run<ComputeShaderPerformanceCPU>();
+            BenchmarkRunner.Run<ComputeShaderPerformanceILGPU>();
+            //ComputeShaderPerformanceILGPU c = new ComputeShaderPerformanceILGPU() { CopyBack = false, Items = 1000 };
+            //c.Acc = c.GetAccelerators.First();
+            //c.Init();
+            //c.Step();
+            //c.Close();
         }
 
         public void Run(string[] args)
