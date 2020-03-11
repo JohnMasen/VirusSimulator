@@ -180,6 +180,19 @@ namespace VirusSimulator.WPF.ViewModel
                     }
 
                 }
+
+                //save last frame
+                string lastFrameFileName = sfd.FileName.Replace(".csv", ".raw.csv");
+                var data = runHistory.Last();
+                using (StreamWriter writer=new StreamWriter(lastFrameFileName,false))
+                {
+                    writer.WriteLine("ID,Status,InfectedBy");
+                    data.Persons.ForAllWtihReference(data.SIRInfo, (ref PositionItem pos, ref SIRData sir) =>
+                    {
+                        writer.WriteLine($"{pos.ID},{sir.Status},{sir.InfectedBy}");
+                    });
+                }
+                
                 updateStatus($"CSV Saved to {sfd.FileName}");
 
 

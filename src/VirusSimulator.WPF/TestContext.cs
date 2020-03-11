@@ -27,7 +27,7 @@ namespace VirusSimulator.WPF
             //(this as IVirusContext).VirusData = new DataBuffer<InfectionData>(Persons.Items.Length, Persons.Bins);
             SIRInfo = new DataBuffer<SIRData>(Persons.Items.Length, 0, _ =>
             {
-                return new SIRData() { Status = SIRData.Susceptible };
+                return new SIRData() { Status = SIRData.Susceptible,InfectedBy=-1 };
             });
             (this as IPersonMoveContext).MoveStatus = new DataBuffer<MoveStatus>(Persons.Items.Length, Persons.Bins, (index) =>
             {
