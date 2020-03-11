@@ -99,7 +99,7 @@
         <Label Content="感染半径" HorizontalAlignment="Left" Margin="508,34,0,0" VerticalAlignment="Top"/>
         <Slider HorizontalAlignment="Left" Margin="566,38,0,0" VerticalAlignment="Top" Width="120" Value="{Binding InfectionRadius}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
         <Label Content="POI数" HorizontalAlignment="Left" Margin="508,55,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="10000" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
+        <Slider HorizontalAlignment="Left" Margin="566,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1000" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
         <TextBlock HorizontalAlignment="Left" Margin="69,40,0,0" Text="FrameSkip" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Margin="129,42,0,0" Text="{Binding FrameSkip}" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
         <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="70000" Minimum="1" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>

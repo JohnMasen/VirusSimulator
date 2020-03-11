@@ -22,9 +22,9 @@ namespace ComputeShaderTest
         bool copyBack = true;
         static void Main(string[] args)
         {
-            //new Program().Run(args);
+            new Program().Run(args);
             //BenchmarkRunner.Run<ComputeShaderPerformanceCPU>();
-            BenchmarkRunner.Run<ComputeShaderPerformanceILGPU>();
+            //BenchmarkRunner.Run<ComputeShaderPerformanceILGPU>();
             //ComputeShaderPerformanceILGPU c = new ComputeShaderPerformanceILGPU() { CopyBack = false, Items = 1000 };
             //c.Acc = c.GetAccelerators.First();
             //c.Init();
@@ -110,18 +110,28 @@ namespace ComputeShaderTest
             var buffer2 = device.AllocateReadOnlyBuffer(b.buffer2);
             int count = 0;
             Vector2[] tmp = new Vector2[items];
+            int binsize = 1;
+            int bins = items / binsize + ((items % binsize) == 0 ? 0 : 1);
             //warm up
             Action<ThreadIds> a = idx =>
             {
-                buffer1[idx.X] = buffer1[idx.X] + buffer2[idx.X];
+                int l = binsize;
+                int pos = binsize * idx.X;
+                while (l>0 && pos<items)
+                {
+                    buffer1[pos] = buffer1[pos] + buffer2[pos];
+                    pos++;
+                    l--;
+                }
+                
             };
-            device.For(items, a);
+            device.For(bins, a);
 
 
             sw.Start();
             while (sw.Elapsed < duration)
             {
-                device.For(items, a);
+                device.For(bins, a);
                 if (copyBack)
                 {
                     buffer1.GetData(tmp);

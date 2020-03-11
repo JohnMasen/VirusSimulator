@@ -19,16 +19,14 @@ namespace VirusSimulator.WPF
         public bool Enabled { get; set; } = true;
         private object drawSync = new object();
         BrushResource redBrush = new SolidBrushResource(Color4.RedColor);
-        BrushResource greeBrush = new SolidBrushResource(Color4.GreenColor);
+        BrushResource greeBrush = new SolidBrushResource(new Color4(76,255,0));
         BrushResource yellowBrush = new SolidBrushResource(Color4.Yellow);
         public async Task Init(RenderLoop loop)
         {
             drawCommands.Clear();
             try
             {
-                
                 await loop.Register2DDrawingLayerAsync(new Custom2DDrawingLayer(drawInternal));
-                Debug.WriteLine("init complete"); // this method was never called
             }
             catch (Exception)
             {
@@ -82,7 +80,7 @@ namespace VirusSimulator.WPF
                      var pos = p.Position;
                      newList.Add((graph) =>
                      {
-                         graph.DrawRectangle(new RectangleF(pos.X,pos.Y, 2, 2), c);
+                         graph.FillRectangle(new RectangleF(pos.X,pos.Y, 5, 5), c);
                      });
                  }
                  

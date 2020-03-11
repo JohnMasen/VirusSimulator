@@ -33,7 +33,7 @@ namespace ComputeShaderTest
             
         }
 
-        [Params(10000)]
+        [Params(1000,10000)]
         public int Items { get; set; } = 1000;
         public bool CopyBack { get; set; } = false;
         [ParamsSource(nameof(GetAccelerators))]
