@@ -38,10 +38,10 @@
                     <RowDefinition Height="251*"/>
                     <RowDefinition Height="371*"/>
                 </Grid.RowDefinitions>
-                <CheckBox Content="Gif输出" HorizontalAlignment="Left" Margin="1,0,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableGIFOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <CheckBox Content="Gif Output" HorizontalAlignment="Left" Margin="1,0,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableGIFOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                 <TextBox HorizontalAlignment="Center" Margin="0,33,0,0" Text="{Binding GifOutputPath, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" Height="18" />
-                <TextBox HorizontalAlignment="Left" Margin="81,128,0,0" Text="{Binding MaxSteps, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <Label Content="最大迭代次数" HorizontalAlignment="Left" Margin="1,124,0,0" VerticalAlignment="Top"/>
+                <TextBox HorizontalAlignment="Left" Margin="115,128,0,0" Text="{Binding MaxSteps, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="86"/>
+                <Label Content="Max Iteration count" HorizontalAlignment="Left" Margin="1,124,0,0" VerticalAlignment="Top"/>
                 <Label Content="{Binding FrameIndex, Mode=OneWay}" HorizontalAlignment="Left" Margin="1,211,0,0" VerticalAlignment="Top" ContentStringFormat="Frame {0}"/>
                 <Grid Margin="0,0,0,0" Grid.Row="1">
                     <Grid.RowDefinitions>
@@ -59,11 +59,11 @@
                         <oxy:ColumnSeries ItemsSource="{Binding SIRRunningTotal, Mode=OneWay}" />
                         <!--<oxy:BarSeries ItemsSource="{Binding RecentHisData, Mode=OneWay}" StackGroup="a" IsStacked="True"/>-->
                     </oxy:Plot>
-                    <Label Content="{Binding Statistics.Infective, Mode=OneWay}" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" ContentStringFormat="感染人数 {0}" Grid.RowSpan="2"/>
+                    <Label Content="{Binding Statistics.Infective, Mode=OneWay}" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" ContentStringFormat="Infectives {0}" Grid.RowSpan="2"/>
                 </Grid>
-                <Label Content="最大感染率" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
+                <Label Content="Max Infection Rate" HorizontalAlignment="Left" Margin="1,151,0,0" VerticalAlignment="Top"/>
                 <Slider HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="182" Maximum="100" Value="{Binding MaxInfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" TickFrequency="10" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
-                <CheckBox Content="实时预览" HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableRealtimeOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <CheckBox Content="Preview" HorizontalAlignment="Left" Margin="120,3,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableRealtimeOutput, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                 <Button Content="CSV" HorizontalAlignment="Left" Margin="141,56,0,0" VerticalAlignment="Top">
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="Click">
@@ -71,8 +71,8 @@
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
                 </Button>
-                <CheckBox Content="自动停止" HorizontalAlignment="Left" Margin="6,109,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableAutoStop, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
-                <CheckBox Content="启用CSV导出" HorizontalAlignment="Left" Margin="30,56,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableCSVExport, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <CheckBox Content="Auto Stop" HorizontalAlignment="Left" Margin="6,109,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableAutoStop, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                <CheckBox Content="Enable CSV output" HorizontalAlignment="Left" Margin="30,56,0,0" VerticalAlignment="Top" IsChecked="{Binding EnableCSVExport, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
             </Grid>
         </Grid>
 
@@ -91,24 +91,24 @@
             </b:Interaction.Triggers>
         </Button>
         <Label Content="{Binding WorldClock, Mode=OneWay}" HorizontalAlignment="Left" Margin="716,5,0,0" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Left" Margin="237,0,0,0" Text="人数" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        <TextBlock HorizontalAlignment="Left" Margin="237,0,0,0" Text="Population" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <TextBox HorizontalAlignment="Left" Margin="301,70,0,0" Text="{Binding InfectedInit, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="27" Height="22"/>
-        <TextBlock HorizontalAlignment="Left" Margin="213,70,0,0" Text="初始感染人数" TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,15,0,0" VerticalAlignment="Top" Width="120" SmallChange="0.01" Maximum="1" LargeChange="0.1" Value="{Binding InfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
-        <Label Content="感染概率" HorizontalAlignment="Left" Margin="508,13,0,0" VerticalAlignment="Top"/>
-        <Label Content="感染半径" HorizontalAlignment="Left" Margin="508,34,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,38,0,0" VerticalAlignment="Top" Width="120" Value="{Binding InfectionRadius}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
-        <Label Content="POI数" HorizontalAlignment="Left" Margin="508,55,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1000" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
+        <TextBlock HorizontalAlignment="Left" Margin="213,70,0,0" Text="Initial Infect" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Margin="644,15,0,0" VerticalAlignment="Top" Width="120" SmallChange="0.01" Maximum="1" LargeChange="0.1" Value="{Binding InfectionRate, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
+        <Label Content="Infection probability" HorizontalAlignment="Left" Margin="508,13,0,0" VerticalAlignment="Top"/>
+        <Label Content="infection Radius" HorizontalAlignment="Left" Margin="508,34,0,0" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Margin="644,38,0,0" VerticalAlignment="Top" Width="120" Value="{Binding InfectionRadius}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2"/>
+        <Label Content="POI Count" HorizontalAlignment="Left" Margin="508,55,0,0" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Margin="644,59,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1000" LargeChange="5" Value="{Binding POICount, Mode=TwoWay, UpdateSourceTrigger=Default}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="2"/>
         <TextBlock HorizontalAlignment="Left" Margin="69,40,0,0" Text="FrameSkip" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" Margin="129,42,0,0" Text="{Binding FrameSkip}" TextWrapping="Wrap" VerticalAlignment="Top" Width="43"/>
         <Slider HorizontalAlignment="Left" Margin="301,0,0,0" VerticalAlignment="Center" Width="181" Value="{Binding PersonCount, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="70000" Minimum="1" TickFrequency="100" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"/>
-        <TextBox HorizontalAlignment="Left" Margin="285,15,0,0" Text="{Binding PointsInitSource, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="197"/>
-        <Label Content="图片初始化" HorizontalAlignment="Left" Margin="215,13,0,0" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Margin="301,15,0,0" Text="{Binding PointsInitSource, Mode=TwoWay, UpdateSourceTrigger=Default}" TextWrapping="Wrap" VerticalAlignment="Top" Width="181"/>
+        <Label Content="Init With Image" HorizontalAlignment="Left" Margin="215,13,0,0" VerticalAlignment="Top"/>
         <TextBlock Grid.Row="3" VerticalAlignment="Bottom" Height="20" Text="{Binding RunStatus, Mode=OneWay}"/>
-        <Label Content="人员活跃度" HorizontalAlignment="Left" Margin="508,76,0,0" VerticalAlignment="Top"/>
-        <Slider HorizontalAlignment="Left" Margin="566,81,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1" LargeChange="5" Value="{Binding PersonActivity}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="0.01"/>
-        <TextBlock HorizontalAlignment="Left" Margin="348,67,0,0" Text="床位数" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Label Content="Person Acitivty" HorizontalAlignment="Left" Margin="508,76,0,0" VerticalAlignment="Top"/>
+        <Slider HorizontalAlignment="Left" Margin="644,81,0,0" VerticalAlignment="Top" Width="120" SmallChange="1" Maximum="1" LargeChange="5" Value="{Binding PersonActivity}" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Minimum="0.01"/>
+        <TextBlock HorizontalAlignment="Left" Margin="348,67,0,0" Text="Hospital Beds" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <Slider HorizontalAlignment="Left" Margin="348,84,0,0" VerticalAlignment="Top" Width="120" Value="{Binding GroundPoolSize, Mode=TwoWay, UpdateSourceTrigger=Default}" Maximum="500" AutoToolTipPlacement="TopLeft"/>
 
     </Grid>

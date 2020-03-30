@@ -80,7 +80,7 @@ namespace VirusSimulator.WPF
                      var pos = p.Position;
                      newList.Add((graph) =>
                      {
-                         graph.FillRectangle(new RectangleF(pos.X,pos.Y, 2, 2), c);
+                         graph.FillRectangle(new RectangleF(pos.X,pos.Y, 4, 4), c);
                      });
                  }
                  
