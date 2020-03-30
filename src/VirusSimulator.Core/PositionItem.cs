@@ -11,7 +11,7 @@ namespace VirusSimulator.Core
     {
         public Vector2 Position;
         public Matrix3x2 Transform;
-
+        public int ID { get; set; }
         public static QuadTreeNode<PositionItem> CreatePersonQuadTree(RectangleF range,int capacity=10)
         {
             return new QuadTreeNode<PositionItem>(range, (ref PositionItem p) =>p.Position, capacity);

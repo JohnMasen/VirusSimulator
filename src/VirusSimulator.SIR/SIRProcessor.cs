@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace VirusSimulator.SIR
 {
@@ -59,15 +60,20 @@ namespace VirusSimulator.SIR
             {
                 if (sir.Status ==SIRData.Susceptible)
                 {
-                    var InfectivesCount = infectedItems.GetItemsCountInDistance(pos.Position, InfectionRadius);
+                    var infectives = infectedItems.GetItemsInDistance(pos.Position, InfectionRadius).ToList();
+                    var InfectivesCount = infectives.Count;
+
                     if (InfectivesCount > 0)
                     {
                         sir.InfectionProgress += InfectivesCount * rate;
                         if (sir.InfectionProgress >= 1f)
                         {
+                            Vector2 currentPos = pos.Position;
+                            var closestInfective = infectives.OrderByDescending(x => Vector2.DistanceSquared(x.Position, currentPos)).First();
                             sir.Status = SIRData.Infective;
                             sir.InfectionProgress = 0;
                             sir.GroundCountdown = GroundDelay;
+                            sir.InfectedBy = closestInfective.ID;
                         }
                     }
                     else

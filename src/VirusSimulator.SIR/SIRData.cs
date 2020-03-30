@@ -14,6 +14,7 @@ namespace VirusSimulator.SIR
         public int Status { get; set; }
 
         public float InfectionProgress { get; set; }
+        public int InfectedBy { get; set; }
 
         public TimeSpan GroundCountdown { get; set; }
         public TimeSpan CureCountdown { get; set; }
